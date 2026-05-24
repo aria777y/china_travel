@@ -3,5 +3,5 @@ window.ROADTRIP_SUPABASE_CONFIG = {
   url: "",
   anonKey: "",
   oauthProvider: "github",
-  redirectPath: "/"
+  redirectPath: "/china_travel/"
 };

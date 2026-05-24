@@ -19,7 +19,7 @@ python3 -m http.server 8765
 5. 启用 GitHub OAuth 或 Email Magic Link。
 6. 在 URL Configuration 中加入本地地址和正式公网地址：
    - `http://localhost:8765`
-   - 正式 Netlify 域名
+   - `https://aria777y.github.io/china_travel/`
 7. 把 Supabase Project URL 和 anon public key 写入 `assets/roadtrip-config.js`：
 
 ```js
@@ -28,7 +28,7 @@ window.ROADTRIP_SUPABASE_CONFIG = {
   url: "https://你的项目.supabase.co",
   anonKey: "你的 anon public key",
   oauthProvider: "github",
-  redirectPath: "/"
+  redirectPath: "/china_travel/"
 };
 ```
 
@@ -64,7 +64,7 @@ Settings -> Pages -> Build and deployment -> Source: Deploy from a branch
 然后选择：
 
 ```text
-Branch: main
+Branch: gh-pages
 Folder: / (root)
 ```
 
