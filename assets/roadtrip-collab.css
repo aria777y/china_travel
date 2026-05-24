@@ -1,0 +1,246 @@
+.auth-bar {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-button,
+.primary-action,
+.ghost-action,
+.mini-action,
+.icon-button,
+.collab-tab {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.auth-button,
+.primary-action,
+.ghost-action,
+.collab-tab {
+  padding: 8px 11px;
+}
+
+.primary-action {
+  background: var(--forest);
+  color: #fff;
+  border-color: var(--forest);
+}
+
+.mini-action {
+  padding: 6px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 9px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #e8e1d5;
+}
+
+.collab-drawer,
+.profile-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: none;
+  background: rgba(18, 24, 20, 0.44);
+}
+
+.collab-drawer.is-open,
+.profile-modal.is-open {
+  display: block;
+}
+
+.collab-drawer-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(560px, 100vw);
+  height: 100%;
+  overflow: auto;
+  background: #fff;
+  box-shadow: -18px 0 44px rgba(34, 33, 29, 0.22);
+  padding: 22px;
+}
+
+.collab-drawer-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.collab-drawer-head h2,
+.profile-card h2 {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.15;
+}
+
+.collab-kicker {
+  margin: 0 0 6px;
+  color: var(--forest);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.icon-button {
+  width: 34px;
+  height: 34px;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.collab-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 18px 0;
+}
+
+.collab-tab.is-active {
+  background: #e7f0eb;
+  border-color: #bfd1c7;
+  color: var(--forest);
+}
+
+.collab-status {
+  min-height: 22px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.collab-list {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.collab-item {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fbfaf6;
+}
+
+.collab-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.collab-author {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 900;
+}
+
+.collab-time {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.collab-body {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.collab-item-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.collab-form {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.collab-form label,
+.profile-card label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 900;
+}
+
+.collab-form textarea,
+.profile-card input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  font: inherit;
+}
+
+.collab-form-actions,
+.profile-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.profile-modal {
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.profile-modal.is-open {
+  display: flex;
+}
+
+.profile-card {
+  width: min(430px, 100%);
+  border-radius: 8px;
+  background: #fff;
+  padding: 22px;
+  box-shadow: var(--shadow);
+}
+
+.profile-error,
+.collab-error {
+  color: #9a3412;
+}
+
+@media (max-width: 760px) {
+  .auth-bar {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .collab-drawer-panel {
+    width: 100vw;
+  }
+}
