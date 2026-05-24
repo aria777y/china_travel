@@ -55,6 +55,12 @@ where display_name = '你的公开显示姓名';
 https://aria777y.github.io/china_travel/
 ```
 
+同一 GitHub Pages 站点也托管狼人杀实战记录工具：
+
+```text
+https://aria777y.github.io/china_travel/werewolf/
+```
+
 推送到 GitHub 后，在仓库页面打开：
 
 ```text

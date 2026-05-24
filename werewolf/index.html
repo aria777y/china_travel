@@ -1,0 +1,3508 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>狼人杀实战记录工具</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #fff6e8;
+      --panel: #fffaf0;
+      --surface: #fffdf7;
+      --ink: #3d3028;
+      --muted: #806f61;
+      --line: #ecd8ba;
+      --blue: #c4773f;
+      --blue-soft: #fff0d5;
+      --wolf: #b65366;
+      --wolf-soft: #fde4e9;
+      --good: #5b8f7c;
+      --good-soft: #e5f3ec;
+      --god: #ad7c2f;
+      --god-soft: #fff1c9;
+      --civil: #7b6b5d;
+      --civil-soft: #f3eadf;
+      --danger: #a94755;
+      --radius: 8px;
+      --shadow: 0 14px 34px rgba(112, 79, 47, 0.13);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        repeating-linear-gradient(45deg, rgba(196, 119, 63, 0.035) 0 1px, transparent 1px 22px),
+        linear-gradient(180deg, rgba(255, 253, 247, 0.96) 0%, rgba(255, 243, 222, 0.96) 44%, rgba(248, 231, 206, 0.96) 100%),
+        var(--bg);
+      color: var(--ink);
+      font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", Arial, sans-serif;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1380px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 18px 0 34px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: stretch;
+      margin-bottom: 14px;
+    }
+
+    .hero-main,
+    .hero-side,
+    .panel {
+      background: rgba(255, 250, 240, 0.92);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-main {
+      padding: 18px;
+    }
+
+    .eyebrow {
+      margin: 0 0 7px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 46px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      width: min(760px, 100%);
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    .hero-side {
+      min-width: 300px;
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+      align-content: center;
+    }
+
+    .status-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .status-line strong {
+      color: var(--ink);
+      font-size: 18px;
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn,
+    .chip,
+    .tab {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--ink);
+      padding: 7px 11px;
+      font-weight: 900;
+      font-size: 13px;
+      transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+    }
+
+    .btn:hover,
+    .chip:hover,
+    .tab:hover {
+      transform: translateY(-1px);
+      border-color: var(--blue);
+    }
+
+    .btn:disabled,
+    .chip:disabled,
+    select:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+      transform: none;
+    }
+
+    .btn.primary,
+    .tab.is-active {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+
+    .btn.danger {
+      background: var(--wolf);
+      color: #fff;
+      border-color: var(--wolf);
+    }
+
+    .btn.ghost {
+      background: transparent;
+    }
+
+    .tabs {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 14px;
+      padding: 10px;
+      border: 1px solid rgba(236, 216, 186, 0.9);
+      border-radius: var(--radius);
+      background: rgba(255, 246, 232, 0.88);
+      backdrop-filter: blur(10px);
+    }
+
+    .phase-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      align-items: center;
+      padding: 10px;
+      margin-bottom: 14px;
+      background: rgba(255, 250, 240, 0.92);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .phase-strip label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .phase-chip {
+      min-height: 32px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .phase-chip.is-active {
+      color: #fff;
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.is-active {
+      display: block;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(330px, 0.65fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 15px;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .panel-head h2,
+    .panel-head h3 {
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    .panel-head h2 {
+      font-size: 20px;
+    }
+
+    .panel-head h3 {
+      font-size: 17px;
+    }
+
+    .panel-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .player-card {
+      position: relative;
+      min-height: 74px;
+      overflow: hidden;
+      padding: 8px 9px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 6px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 7px 20px rgba(112, 79, 47, 0.08);
+    }
+
+    .player-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 5px;
+      background: var(--civil);
+    }
+
+    .player-card[data-read="偏好"]::before,
+    .player-card[data-read="铁好"]::before {
+      background: var(--good);
+    }
+
+    .player-card[data-read="偏狼"]::before,
+    .player-card[data-read="铁狼"]::before {
+      background: var(--wolf);
+    }
+
+    .player-card.is-selected {
+      border-color: var(--blue);
+      box-shadow: 0 12px 26px rgba(196, 119, 63, 0.22);
+      transform: translateY(-2px);
+    }
+
+    .player-card.is-out {
+      opacity: 0.62;
+    }
+
+    .player-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .seat {
+      display: inline-flex;
+      min-width: 30px;
+      height: 24px;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background: #4a372b;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .mini-status {
+      min-height: 22px;
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: var(--civil-soft);
+      color: var(--civil);
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .mini-status.wolf {
+      color: var(--wolf);
+      background: var(--wolf-soft);
+    }
+
+    .mini-status.good {
+      color: var(--good);
+      background: var(--good-soft);
+    }
+
+    .mini-status.dead {
+      color: var(--danger);
+      background: #fde9df;
+    }
+
+    .player-name {
+      min-width: 0;
+    }
+
+    .player-name h3 {
+      margin: 0;
+      font-size: 21px;
+      line-height: 1.1;
+      letter-spacing: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .roles {
+      display: grid;
+      align-content: center;
+      gap: 2px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .latest {
+      display: flex;
+      flex-wrap: wrap;
+      align-content: start;
+      gap: 5px;
+      min-height: 36px;
+    }
+
+    .tag {
+      min-height: 22px;
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: var(--civil-soft);
+      color: #465164;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tag.hot {
+      color: var(--wolf);
+      background: var(--wolf-soft);
+    }
+
+    .tag.good {
+      color: var(--good);
+      background: var(--good-soft);
+    }
+
+    .tag.blue {
+      color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .card-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .side-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .field,
+    .wide-field {
+      display: grid;
+      gap: 5px;
+    }
+
+    .wide-field {
+      grid-column: 1 / -1;
+    }
+
+    label,
+    .field span,
+    .wide-field span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--ink);
+      padding: 9px 10px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 74px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(196, 119, 63, 0.16);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .chip.is-selected {
+      color: #fff;
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .chip.hot {
+      color: var(--wolf);
+      background: var(--wolf-soft);
+      border-color: #edc0c8;
+    }
+
+    .chip.good {
+      color: var(--good);
+      background: var(--good-soft);
+      border-color: #bddccf;
+    }
+
+    .chip.summary-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .chip.summary-tag.is-selected {
+      box-shadow: 0 0 0 2px rgba(196, 119, 63, 0.22);
+    }
+
+    .chip.summary-tag.is-selected::before {
+      content: "✓";
+      display: inline-grid;
+      place-items: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 11px;
+      line-height: 1;
+    }
+
+    .selected-player {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding: 10px;
+      background: var(--blue-soft);
+      border: 1px solid #edce9a;
+      border-radius: var(--radius);
+    }
+
+    .selected-player strong {
+      font-size: 20px;
+    }
+
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    .quick-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: none;
+      place-items: center;
+      padding: 18px;
+      background: rgba(61, 48, 40, 0.34);
+      backdrop-filter: blur(8px);
+    }
+
+    .quick-modal.is-open {
+      display: grid;
+    }
+
+    .quick-modal-card {
+      width: min(760px, calc(100vw - 24px));
+      max-height: min(88vh, 860px);
+      overflow: auto;
+      padding: 15px;
+      background: rgba(255, 250, 240, 0.98);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 22px 54px rgba(84, 54, 30, 0.28);
+    }
+
+    .quick-modal-head {
+      position: sticky;
+      top: -15px;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 12px;
+      margin: -15px -15px 12px;
+      padding: 15px;
+      background: rgba(255, 250, 240, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+    }
+
+    .quick-modal-head h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .quick-panel-entry {
+      display: grid;
+      gap: 10px;
+    }
+
+    .quick-actions,
+    .status-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .player-note-list {
+      display: grid;
+      gap: 8px;
+      max-height: 320px;
+      overflow: auto;
+      padding-right: 3px;
+    }
+
+    .player-note-item {
+      padding: 10px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .player-note-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .inline-tools {
+      margin-left: auto;
+      display: inline-flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .inline-tools .btn {
+      min-height: 24px;
+      padding: 3px 7px;
+      font-size: 11px;
+    }
+
+    .player-note-item p {
+      margin: 0;
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .phase-note-section {
+      display: grid;
+      gap: 7px;
+      padding: 9px;
+      background: rgba(255, 255, 255, 0.62);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .phase-note-section h4 {
+      margin: 0;
+      color: var(--blue);
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+
+    .board-config {
+      margin: 12px 0;
+      padding: 12px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .board-config-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .board-config-head h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .board-config-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-align: right;
+    }
+
+    .board-preset-list {
+      margin: 0 0 12px;
+    }
+
+    .role-config-list {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .faction-card {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      min-height: 150px;
+      padding: 10px;
+      background: #fff8ed;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .faction-card[data-faction="wolf"] {
+      background: var(--wolf-soft);
+      border-color: #edc0c8;
+    }
+
+    .faction-card[data-faction="god"] {
+      background: var(--god-soft);
+      border-color: #e0c07b;
+    }
+
+    .faction-card[data-faction="civil"] {
+      background: var(--civil-soft);
+      border-color: #ded0bd;
+    }
+
+    .faction-card[data-faction="third"] {
+      background: var(--blue-soft);
+      border-color: #edce9a;
+    }
+
+    .faction-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .faction-head strong {
+      font-size: 16px;
+    }
+
+    .faction-total {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    .role-config-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 72px 38px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .role-config-row .btn {
+      min-height: 38px;
+      padding: 7px 8px;
+    }
+
+    .table-map {
+      position: relative;
+      min-height: 520px;
+      margin-top: 12px;
+      background:
+        linear-gradient(90deg, rgba(196, 119, 63, 0.06), transparent 35%, rgba(91, 143, 124, 0.06)),
+        var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .table-center {
+      position: absolute;
+      inset: 32% 28%;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 900;
+      border: 2px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 250, 240, 0.92);
+    }
+
+    .table-seat {
+      position: absolute;
+      width: min(210px, 26%);
+      min-width: 132px;
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr);
+      gap: 7px;
+      align-items: center;
+      padding: 8px;
+      background: rgba(255, 253, 247, 0.94);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 7px 18px rgba(112, 79, 47, 0.09);
+      transform: translate(-50%, -50%);
+    }
+
+    .table-seat input {
+      min-width: 0;
+      padding: 8px 9px;
+    }
+
+    .vote-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .voter-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .voter {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 38px;
+      padding: 7px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .history {
+      display: grid;
+      gap: 10px;
+    }
+
+    .history-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 11px;
+    }
+
+    .history-card h3 {
+      margin: 0 0 7px;
+      font-size: 15px;
+    }
+
+    .history-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .history-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+      gap: 14px;
+    }
+
+    .saved-game-list {
+      display: grid;
+      gap: 9px;
+      max-height: 520px;
+      overflow: auto;
+      padding-right: 3px;
+    }
+
+    .saved-game-card {
+      min-height: 78px;
+      position: relative;
+      display: grid;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: 0 7px 18px rgba(112, 79, 47, 0.07);
+      overflow: hidden;
+    }
+
+    .saved-game-card:hover,
+    .saved-game-card.is-selected {
+      border-color: var(--accent);
+      background: #fff6e4;
+    }
+
+    .saved-game-main {
+      width: 100%;
+      min-height: 76px;
+      display: grid;
+      gap: 5px;
+      text-align: left;
+      padding: 11px 58px 11px 11px;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .saved-game-card strong {
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .saved-game-card span,
+    .saved-game-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .saved-game-delete {
+      position: absolute;
+      top: 9px;
+      right: 9px;
+      min-height: 30px;
+      padding: 5px 9px;
+      font-size: 12px;
+    }
+
+    .vote-bar {
+      height: 12px;
+      overflow: hidden;
+      margin-top: 8px;
+      background: #f0dfc5;
+      border-radius: 999px;
+    }
+
+    .vote-fill {
+      height: 100%;
+      background: var(--wolf);
+      border-radius: inherit;
+    }
+
+    .vote-phase-list {
+      display: grid;
+      gap: 11px;
+    }
+
+    .vote-group {
+      display: grid;
+      gap: 9px;
+      padding: 11px;
+      background: rgba(255, 255, 255, 0.62);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .vote-group-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .vote-group-head h3 {
+      margin: 0;
+      color: var(--blue);
+      font-size: 16px;
+    }
+
+    .vote-count-pill {
+      min-height: 24px;
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 9px;
+      max-height: 540px;
+      overflow: auto;
+      padding-right: 3px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 84px 1fr;
+      gap: 9px;
+      padding: 10px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .timeline-item time {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .timeline-item p {
+      margin: 0;
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: 14px;
+    }
+
+    .review-output {
+      min-height: 520px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 9px;
+      max-height: 520px;
+      overflow: auto;
+    }
+
+    .empty {
+      min-height: 120px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      text-align: center;
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.5);
+      padding: 16px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 40;
+      max-width: min(360px, calc(100% - 36px));
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      background: rgba(74, 55, 43, 0.94);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 900;
+      box-shadow: 0 12px 32px rgba(84, 54, 30, 0.24);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .toast.is-showing {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .mobile-dock {
+      display: none;
+    }
+
+    @media (max-width: 1100px) {
+      .hero,
+      .main-grid,
+      .vote-layout,
+      .history-grid,
+      .review-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-side {
+        min-width: 0;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        width: min(100% - 16px, 1380px);
+        padding-top: 8px;
+        padding-bottom: 88px;
+      }
+
+      .tabs {
+        position: static;
+      }
+
+      .hero-main,
+      .hero-side,
+      .panel {
+        padding: 12px;
+      }
+
+      .board {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .player-card {
+        min-height: 72px;
+        padding: 7px;
+      }
+
+      .player-name h3 {
+        font-size: 17px;
+      }
+
+      .roles,
+      .card-note {
+        font-size: 11px;
+      }
+
+      .role-config-list {
+        grid-template-columns: 1fr;
+      }
+
+      .role-config-row {
+        grid-template-columns: 1fr 86px 40px;
+      }
+
+      .table-map {
+        min-height: 780px;
+      }
+
+      .table-center {
+        inset: 42% 20%;
+      }
+
+      .table-seat {
+        width: 44%;
+        min-width: 0;
+        grid-template-columns: 42px minmax(0, 1fr);
+      }
+
+      .field-grid,
+      .voter-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .timeline-item {
+        grid-template-columns: 1fr;
+      }
+
+      .mobile-dock {
+        position: fixed;
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
+        z-index: 30;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 7px;
+        padding: 8px;
+        background: rgba(74, 55, 43, 0.92);
+        border-radius: var(--radius);
+        box-shadow: 0 12px 32px rgba(84, 54, 30, 0.24);
+      }
+
+      .mobile-dock button {
+        min-height: 42px;
+        border: 0;
+        border-radius: var(--radius);
+        background: #fffaf0;
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .toast {
+        right: 10px;
+        bottom: 70px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <section class="hero-main">
+        <p class="eyebrow">Werewolf Live Recorder · 单页本地工具</p>
+        <h1>狼人杀实战记录工具</h1>
+        <p class="subtitle">按“点玩家、点标签、补一句”的节奏记录发言、身份、票型和重要节点。游戏结束后直接生成可复盘文本，适合手机、平板和电脑浏览器。</p>
+      </section>
+      <aside class="hero-side">
+        <div class="status-line">
+          <span>当前阶段</span>
+          <strong id="currentPhaseLabel">警上</strong>
+        </div>
+        <div class="status-line">
+          <span>选中玩家</span>
+          <strong id="currentPlayerLabel">1号</strong>
+        </div>
+        <div class="top-actions">
+          <button class="btn primary" type="button" id="fillExampleBtn">填入示例局</button>
+          <button class="btn ghost" type="button" id="toggleRevealBtn">显示真实身份</button>
+          <button class="btn primary" type="button" data-save-current>保存本局</button>
+          <button class="btn ghost" type="button" id="exportGameBtn">导出本局</button>
+          <button class="btn ghost" type="button" id="importGameBtn">导入本局</button>
+          <input type="file" id="importGameInput" accept="application/json,.json" hidden>
+          <button class="btn danger" type="button" id="resetBtn">清空本局</button>
+        </div>
+      </aside>
+    </header>
+
+    <nav class="tabs" aria-label="主要视图">
+      <button class="tab is-active" type="button" data-view="record">实战记录</button>
+      <button class="tab" type="button" data-view="setup">开局配置</button>
+      <button class="tab" type="button" data-view="votes">票型总览</button>
+      <button class="tab" type="button" data-view="review">赛后复盘</button>
+      <button class="tab" type="button" data-view="history">历史记录</button>
+    </nav>
+
+    <section class="phase-strip" aria-label="阶段切换">
+      <label>阶段</label>
+      <button class="phase-chip is-active" type="button" data-phase="警上">警上</button>
+      <button class="phase-chip" type="button" data-phase="第一天白天">第一天白天</button>
+      <button class="phase-chip" type="button" data-phase="第二天白天">第二天白天</button>
+      <button class="phase-chip" type="button" data-phase="第三天白天">第三天白天</button>
+      <button class="phase-chip" type="button" data-phase="第四天白天">第四天白天</button>
+      <button class="phase-chip" type="button" data-phase="第五天白天">第五天白天</button>
+      <button class="phase-chip" type="button" data-phase="第六天白天">第六天白天</button>
+      <button class="phase-chip" type="button" data-phase="第七天白天">第七天白天</button>
+    </section>
+
+    <section class="view is-active" id="view-record">
+      <div class="main-grid">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2 id="boardTitle">12人战术桌盘</h2>
+            </div>
+            <p>点玩家，弹窗快速记录</p>
+          </div>
+          <div class="board" id="playerBoard"></div>
+        </section>
+
+        <aside class="side-stack">
+          <section class="panel" id="quickPanel"></section>
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>历史对局</h3>
+              </div>
+              <p>保存后可回看</p>
+            </div>
+            <div class="quick-actions" style="margin-bottom:10px">
+              <button class="btn primary" type="button" data-save-current>保存当前局</button>
+            </div>
+            <div class="saved-game-list" id="recentSavedGames"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head">
+              <h3>最近记录</h3>
+              <p>自动沉淀复盘线</p>
+            </div>
+            <div class="timeline" id="miniTimeline"></div>
+          </section>
+        </aside>
+      </div>
+    </section>
+
+    <section class="view" id="view-setup">
+      <div class="main-grid">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>开局配置</h2>
+            </div>
+            <p>人数、板子、桌位名字和规则说明</p>
+          </div>
+          <div class="field-grid" style="margin-bottom:12px">
+            <label class="field">
+              <span>人数</span>
+              <select id="seatCountInput">
+                <option value="11">11人</option>
+                <option value="12">12人</option>
+                <option value="13">13人</option>
+                <option value="14">14人</option>
+                <option value="15">15人</option>
+              </select>
+            </label>
+            <label class="wide-field">
+              <span>本局标题</span>
+              <input id="gameTitleInput" placeholder="例如：周五线下12人机械狼局">
+            </label>
+            <label class="wide-field">
+              <span>赛果</span>
+              <input id="resultInput" placeholder="例如：狼人胜 / 好人胜 / 复盘中">
+            </label>
+          </div>
+          <div class="board-config">
+            <div class="board-config-head">
+              <h3>板子配置</h3>
+              <p id="roleConfigStatus">按阵营配置身份数量</p>
+            </div>
+            <div class="board-config-head">
+              <h3>常用板子</h3>
+              <p>来自附件规则，点一下自动填角色</p>
+            </div>
+            <div class="chips board-preset-list" id="boardPresetList"></div>
+            <div class="role-config-list" id="roleConfigRows"></div>
+            <div class="quick-actions" style="margin-top:10px">
+              <button class="btn primary" type="button" data-add-faction="wolf">添加狼</button>
+              <button class="btn primary" type="button" data-add-faction="god">添加神</button>
+              <button class="btn primary" type="button" data-add-faction="civil">添加民</button>
+              <button class="btn primary" type="button" data-add-faction="third">添加三方</button>
+              <button class="btn ghost" type="button" id="fillCivilianBtn">补齐平民</button>
+            </div>
+          </div>
+          <div class="panel-head" style="margin-top:12px">
+            <div>
+              <h3>桌位玩家名</h3>
+            </div>
+            <p>方桌视图，只填号码对应名字</p>
+          </div>
+          <div class="setup-table" id="setupRows"></div>
+        </section>
+
+        <aside class="side-stack">
+          <section class="panel">
+            <div class="panel-head">
+              <h3>规则说明</h3>
+            </div>
+            <div class="history-card">
+              <p><b>人数建议</b>：12/15人默认狼神民均分；13人默认加1个三方；14人默认加2个三方；11人默认狼4神4民3，可记录神民共用位或双刀规则。</p>
+            </div>
+            <div class="history-card" style="margin-top:10px">
+              <label class="wide-field">
+                <span>神职规则</span>
+                <textarea id="godRuleInput" placeholder="例如：女巫首夜是否可自救、守卫是否可连续守、猎人开枪限制"></textarea>
+              </label>
+            </div>
+            <div class="history-card" style="margin-top:10px">
+              <label class="wide-field">
+                <span>狼人规则</span>
+                <textarea id="wolfRuleInput" placeholder="例如：狼王开枪、机械狼学习、是否允许自爆吞警徽/吞发言"></textarea>
+              </label>
+            </div>
+            <div class="history-card" style="margin-top:10px">
+              <label class="wide-field">
+                <span>三方/特殊规则</span>
+                <textarea id="thirdRuleInput" placeholder="例如：三方胜利条件、11人神民共用位、双刀规则、14人是否按双三方"></textarea>
+              </label>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </section>
+
+    <section class="view" id="view-votes">
+      <div class="vote-layout">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>票型总览</h2>
+            </div>
+            <p>先选阶段，再点投票人</p>
+          </div>
+          <div class="field-grid">
+            <label class="field">
+              <span>票型阶段</span>
+              <select id="votePhaseInput"></select>
+            </label>
+            <label class="field">
+              <span>轮次</span>
+              <input id="voteRoundInput" placeholder="警徽票 / 放逐票 / PK票">
+            </label>
+            <label class="field">
+              <span>被投目标</span>
+              <select id="voteTargetInput"></select>
+            </label>
+          </div>
+          <div class="quick-actions" style="margin-top:10px">
+            <button class="btn ghost" type="button" id="clearVotersBtn">清空投票人</button>
+            <button class="btn danger" type="button" id="clearVotesBtn">清空票型</button>
+            <button class="btn primary" type="button" id="saveVoteBtn">保存票型</button>
+          </div>
+          <div class="voter-grid" id="voterGrid"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>总览记录</h2>
+            </div>
+            <p>按警徽和每天白天分组</p>
+          </div>
+          <div class="vote-phase-list" id="voteOverview"></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="view" id="view-review">
+      <div class="review-grid">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>玩家复盘摘要</h2>
+            </div>
+            <p>身份、听感、发言要点</p>
+          </div>
+          <div class="summary-list" id="playerSummary"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>复盘文本</h2>
+            </div>
+            <p>可直接复制到群里</p>
+          </div>
+          <div class="quick-actions" style="margin-bottom:10px">
+            <button class="btn primary" type="button" id="refreshReviewBtn">刷新复盘</button>
+            <button class="btn primary" type="button" data-save-current>保存到历史</button>
+            <button class="btn ghost" type="button" id="copyReviewBtn">复制复盘</button>
+            <button class="btn ghost" type="button" id="selectReviewBtn">选中文本</button>
+          </div>
+          <textarea class="review-output" id="reviewOutput" readonly></textarea>
+        </section>
+      </div>
+    </section>
+
+    <section class="view" id="view-history">
+      <div class="history-grid">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>历史保存</h2>
+            </div>
+            <p>按日期、板子和局数命名</p>
+          </div>
+          <div class="quick-actions" style="margin-bottom:10px">
+            <button class="btn primary" type="button" data-save-current>保存当前局</button>
+          </div>
+          <div class="saved-game-list" id="savedGameList"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2 id="savedGameDetailTitle">历史详情</h2>
+            </div>
+            <p id="savedGameDetailMeta">点击左侧记录查看</p>
+          </div>
+          <div class="quick-actions" style="margin-bottom:10px">
+            <button class="btn ghost" type="button" id="copySavedGameBtn">复制详情</button>
+            <button class="btn ghost" type="button" id="loadSavedGameBtn">载入为当前局</button>
+            <button class="btn danger" type="button" id="deleteSavedGameBtn">删除记录</button>
+          </div>
+          <textarea class="review-output" id="savedGameDetailOutput" readonly></textarea>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <div class="quick-modal" id="quickModal" aria-hidden="true">
+    <section class="quick-modal-card" role="dialog" aria-modal="true" aria-labelledby="quickModalTitle">
+      <div class="quick-modal-head">
+        <div>
+          <p class="eyebrow" style="margin:0 0 4px">玩家速记</p>
+          <h2 id="quickModalTitle">快速记录</h2>
+        </div>
+        <button class="btn ghost" type="button" id="closeQuickModalBtn">关闭</button>
+      </div>
+      <div id="quickModalPanel"></div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <nav class="mobile-dock" aria-label="手机快捷入口">
+    <button type="button" data-mobile-view="record">记录</button>
+    <button type="button" data-mobile-view="setup">配置</button>
+    <button type="button" data-mobile-view="votes">票型</button>
+    <button type="button" data-mobile-view="review">复盘</button>
+    <button type="button" data-mobile-view="history">历史</button>
+  </nav>
+
+  <script>
+    const STORAGE_KEY = "werewolf-live-recorder-v1";
+    const SAVED_GAMES_KEY = "werewolf-live-recorder-saves-v1";
+
+    const roles = [
+      "未标", "好人", "民", "狼", "预言家", "女巫", "猎人", "守卫", "白痴", "骑士",
+      "通灵师", "机械狼", "狼王", "狼美人", "石像鬼", "怪盗狼王", "摄梦人", "魔术师",
+      "守墓人", "侦探", "警犬", "丘比特", "盗贼", "野孩子", "咒狐", "三方", "其他"
+    ];
+
+    const factionLabels = {
+      wolf: "狼",
+      god: "神",
+      civil: "民",
+      third: "三方/特殊"
+    };
+
+    const factionRoles = {
+      wolf: ["狼", "机械狼", "狼王", "狼美人", "石像鬼", "怪盗狼王"],
+      god: ["预言家", "女巫", "猎人", "守卫", "白痴", "骑士", "通灵师", "摄梦人", "魔术师", "守墓人", "侦探", "警犬"],
+      civil: ["民"],
+      third: ["三方", "丘比特", "盗贼", "野孩子", "咒狐", "其他"]
+    };
+
+    const roleConfigRoles = Object.values(factionRoles).flat();
+    const allowedSeatCounts = [11, 12, 13, 14, 15];
+    const reads = ["未知", "偏好", "偏狼", "铁好", "铁狼"];
+    const summaryTags = ["身份高", "身份低", "信息位", "抗推位", "重点盯", "冲锋", "倒钩", "站错边", "盘得清", "可放", "双刀位", "MVP", "失误点"];
+    const statuses = ["在场", "出局", "放逐", "刀死", "毒死", "枪带", "自爆"];
+    const dayPhases = [
+      "第一天白天", "第二天白天", "第三天白天", "第四天白天",
+      "第五天白天", "第六天白天", "第七天白天"
+    ];
+    const phases = ["警上", ...dayPhases];
+    const votePhases = ["警徽", ...dayPhases];
+
+    const boardPresets = [
+      {
+        id: "seer-witch-hunter-idiot",
+        name: "预女猎白",
+        seatCount: 12,
+        roleConfig: [
+          { faction: "wolf", role: "狼", count: 4 },
+          { faction: "god", role: "预言家", count: 1 },
+          { faction: "god", role: "女巫", count: 1 },
+          { faction: "god", role: "猎人", count: 1 },
+          { faction: "god", role: "白痴", count: 1 },
+          { faction: "civil", role: "民", count: 4 }
+        ],
+        ruleNotes: {
+          god: "预言家验阵营；女巫一解一毒且通常不可自救；猎人非毒出局可开枪；白痴被放逐翻牌免死、失去投票权。",
+          wolf: "4名普通狼人夜间共刀，白天可自爆，屠边规则。",
+          third: ""
+        }
+      },
+      {
+        id: "wolf-king-guard",
+        name: "狼王守卫",
+        seatCount: 12,
+        roleConfig: [
+          { faction: "wolf", role: "狼王", count: 1 },
+          { faction: "wolf", role: "狼", count: 3 },
+          { faction: "god", role: "预言家", count: 1 },
+          { faction: "god", role: "女巫", count: 1 },
+          { faction: "god", role: "猎人", count: 1 },
+          { faction: "god", role: "守卫", count: 1 },
+          { faction: "civil", role: "民", count: 4 }
+        ],
+        ruleNotes: {
+          god: "预言家、女巫、猎人、守卫标准技能；守卫不可连守，同守同救死亡。",
+          wolf: "狼王白天放逐出局可开枪，夜间死亡不能发动；普通狼人共刀可自爆。",
+          third: ""
+        }
+      },
+      {
+        id: "wolf-king-dreamer",
+        name: "狼王摄梦",
+        seatCount: 12,
+        roleConfig: [
+          { faction: "wolf", role: "狼王", count: 1 },
+          { faction: "wolf", role: "狼", count: 3 },
+          { faction: "god", role: "预言家", count: 1 },
+          { faction: "god", role: "女巫", count: 1 },
+          { faction: "god", role: "猎人", count: 1 },
+          { faction: "god", role: "摄梦人", count: 1 },
+          { faction: "civil", role: "民", count: 4 }
+        ],
+        ruleNotes: {
+          god: "摄梦人每晚必须梦游1人，免疫狼刀和毒；连续两晚梦同一人则梦杀；摄梦人夜死时当晚梦游者同死。",
+          wolf: "狼王白天放逐出局可开枪；普通狼人共刀可自爆。",
+          third: ""
+        }
+      },
+      {
+        id: "wolf-beauty-guard",
+        name: "狼美守卫",
+        seatCount: 12,
+        roleConfig: [
+          { faction: "wolf", role: "狼美人", count: 1 },
+          { faction: "wolf", role: "狼", count: 3 },
+          { faction: "god", role: "预言家", count: 1 },
+          { faction: "god", role: "女巫", count: 1 },
+          { faction: "god", role: "猎人", count: 1 },
+          { faction: "god", role: "守卫", count: 1 },
+          { faction: "civil", role: "民", count: 4 }
+        ],
+        ruleNotes: {
+          god: "预言家、女巫、猎人、守卫标准技能；殉情玩家无法发动自身技能。",
+          wolf: "狼美人随狼队刀人后单独魅惑1人，不可连续两晚魅惑同一人；狼美人出局时昨夜被魅惑者殉情。",
+          third: ""
+        }
+      },
+      {
+        id: "wolf-beauty-knight",
+        name: "狼美骑士",
+        seatCount: 12,
+        roleConfig: [
+          { faction: "wolf", role: "狼美人", count: 1 },
+          { faction: "wolf", role: "狼", count: 3 },
+          { faction: "god", role: "预言家", count: 1 },
+          { faction: "god", role: "女巫", count: 1 },
+          { faction: "god", role: "骑士", count: 1 },
+          { faction: "god", role: "守卫", count: 1 },
+          { faction: "civil", role: "民", count: 4 }
+        ],
+        ruleNotes: {
+          god: "骑士在警徽落地后、警长归票前可决斗1人；决斗狼人则狼人出局，决斗好人则骑士出局。",
+          wolf: "狼美人每晚魅惑1人，出局时带走昨夜魅惑对象；普通狼人共刀可自爆。",
+          third: ""
+        }
+      },
+      {
+        id: "mechanical-psychic",
+        name: "机械通灵",
+        seatCount: 12,
+        roleConfig: [
+          { faction: "wolf", role: "机械狼", count: 1 },
+          { faction: "wolf", role: "狼", count: 3 },
+          { faction: "god", role: "通灵师", count: 1 },
+          { faction: "god", role: "女巫", count: 1 },
+          { faction: "god", role: "猎人", count: 1 },
+          { faction: "god", role: "守卫", count: 1 },
+          { faction: "civil", role: "民", count: 4 }
+        ],
+        ruleNotes: {
+          god: "通灵师每晚查具体身份；女巫一解一毒不可自救；猎人非毒出局可开枪；守卫不可连守。",
+          wolf: "机械狼不与小狼见面，仅1次学习1名玩家并获得技能；普通狼人全出局后机械狼解锁狼刀。",
+          third: ""
+        }
+      },
+      {
+        id: "gargoyle-gravekeeper",
+        name: "石像鬼守墓人",
+        seatCount: 12,
+        roleConfig: [
+          { faction: "wolf", role: "石像鬼", count: 1 },
+          { faction: "wolf", role: "狼", count: 3 },
+          { faction: "god", role: "预言家", count: 1 },
+          { faction: "god", role: "女巫", count: 1 },
+          { faction: "god", role: "猎人", count: 1 },
+          { faction: "god", role: "守墓人", count: 1 },
+          { faction: "civil", role: "民", count: 4 }
+        ],
+        ruleNotes: {
+          god: "守墓人第二夜起可得知上一个白天被放逐玩家阵营；预言家、女巫、猎人标准技能。",
+          wolf: "石像鬼每晚查具体身份，不与小狼见面、不能自爆、不能参与刀人；小狼全出后获得刀人能力。",
+          third: ""
+        }
+      },
+      {
+        id: "detective-rogue",
+        name: "侦探怪盗",
+        seatCount: 12,
+        roleConfig: [
+          { faction: "wolf", role: "怪盗狼王", count: 1 },
+          { faction: "wolf", role: "狼", count: 3 },
+          { faction: "god", role: "侦探", count: 1 },
+          { faction: "god", role: "警犬", count: 1 },
+          { faction: "god", role: "女巫", count: 1 },
+          { faction: "god", role: "守卫", count: 1 },
+          { faction: "civil", role: "民", count: 4 }
+        ],
+        ruleNotes: {
+          god: "侦探白天可翻牌夺警并指定处决1人；侦探翻牌后警犬激活，错杀好人可咬人，处决狼人可查验。",
+          wolf: "怪盗狼王有1次免死护盾，发动后免疫当晚至次日白天所有死亡；最后一狼不能发动，技能未用不能自爆。",
+          third: ""
+        }
+      },
+      {
+        id: "cupid-thief",
+        name: "丘比特盗贼",
+        seatCount: 12,
+        deckSize: 14,
+        roleConfig: [
+          { faction: "wolf", role: "狼王", count: 1 },
+          { faction: "wolf", role: "狼", count: 2 },
+          { faction: "god", role: "预言家", count: 1 },
+          { faction: "god", role: "女巫", count: 1 },
+          { faction: "god", role: "猎人", count: 1 },
+          { faction: "god", role: "白痴", count: 1 },
+          { faction: "civil", role: "民", count: 5 },
+          { faction: "third", role: "丘比特", count: 1 },
+          { faction: "third", role: "盗贼", count: 1 }
+        ],
+        ruleNotes: {
+          god: "12人使用14张牌库；盗贼首夜二选一并埋1张牌，丘比特连2名情侣；猎人/狼王殉情不开技能。",
+          wolf: "牌库中狼王1、普通狼人2；盗贼两张可选牌中有狼时必须选狼，保证场上固定3狼。",
+          third: "人狼链时丘比特与情侣为第三方，需屠城获胜；好好链走好人，狼狼链走狼人。"
+        }
+      }
+    ];
+
+    const examplePlayers = [
+      ["杨", "猎人", "猎人", "偏好"],
+      ["太阳", "民", "女巫", "偏好"],
+      ["小头", "未标", "民", "未知"],
+      ["清醒", "民", "民", "偏好"],
+      ["十叶", "预言家", "守卫", "偏好"],
+      ["鸽子", "未标", "狼", "偏狼"],
+      ["wha", "民", "通灵师", "偏好"],
+      ["美女1", "未标", "狼", "偏狼"],
+      ["美女2", "未标", "狼", "偏狼"],
+      ["龙", "未标", "机械狼", "偏狼"],
+      ["w", "预言家", "民", "未知"],
+      ["美女3", "未标", "民", "未知"]
+    ];
+
+    let state = loadState();
+    let savedGames = loadSavedGames();
+    let selectedSavedGameId = savedGames[0]?.id || "";
+    let selectedVoters = new Set();
+    let quickModalOpen = false;
+
+    function createPlayers(count = 12) {
+      return Array.from({ length: count }, (_, index) => ({
+        seat: index + 1,
+        name: `${index + 1}号`,
+        claimRole: "未标",
+        trueRole: "未标",
+        read: "未知",
+        finalTags: [],
+        status: "在场",
+        phaseStatuses: {},
+        sheriff: false
+      }));
+    }
+
+    function defaultRoleConfig(count = 12) {
+      const map = {
+        11: [
+          ["wolf", "狼", 4], ["god", "预言家", 1], ["god", "女巫", 1], ["god", "猎人", 1], ["god", "守卫", 1], ["civil", "民", 3]
+        ],
+        12: [
+          ["wolf", "狼", 4], ["god", "预言家", 1], ["god", "女巫", 1], ["god", "猎人", 1], ["god", "守卫", 1], ["civil", "民", 4]
+        ],
+        13: [
+          ["wolf", "狼", 4], ["god", "预言家", 1], ["god", "女巫", 1], ["god", "猎人", 1], ["god", "守卫", 1], ["civil", "民", 4], ["third", "三方", 1]
+        ],
+        14: [
+          ["wolf", "狼", 4], ["god", "预言家", 1], ["god", "女巫", 1], ["god", "猎人", 1], ["god", "守卫", 1], ["civil", "民", 4], ["third", "三方", 2]
+        ],
+        15: [
+          ["wolf", "狼", 5], ["god", "预言家", 1], ["god", "女巫", 1], ["god", "猎人", 1], ["god", "守卫", 1], ["god", "白痴", 1], ["civil", "民", 5]
+        ]
+      };
+      return (map[count] || map[12]).map(([faction, role, countValue]) => ({ faction, role, count: countValue }));
+    }
+
+    function defaultState() {
+      return {
+        title: "新狼人杀对局",
+        result: "",
+        seatCount: 12,
+        preset: "12-standard",
+        roleConfig: defaultRoleConfig(12),
+        ruleNotes: {
+          god: "",
+          wolf: "",
+          third: ""
+        },
+        phase: "警上",
+        selectedSeat: 1,
+        revealRoles: false,
+        pendingTags: [],
+        players: createPlayers(12),
+        notes: [],
+        votes: [],
+        events: []
+      };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return defaultState();
+        const parsed = JSON.parse(raw);
+        return normalizeGameState(parsed);
+      } catch (error) {
+        return defaultState();
+      }
+    }
+
+    function normalizeGameState(input) {
+      const parsed = input && typeof input === "object" ? input : {};
+      const base = defaultState();
+      const seatCount = normalizeSeatCount(parsed.seatCount || base.seatCount);
+      const gameState = {
+        ...base,
+        ...parsed,
+        seatCount,
+        phase: normalizePhase(parsed.phase || base.phase),
+        roleConfig: normalizeRoleConfig(parsed.roleConfig, seatCount),
+        ruleNotes: {
+          ...base.ruleNotes,
+          ...(parsed.ruleNotes || {})
+        },
+        players: normalizePlayers(parsed.players || base.players, seatCount),
+        notes: normalizeNotes(parsed.notes || []),
+        votes: normalizeVotes(parsed.votes || []),
+        events: normalizeEvents(parsed.events || []),
+        pendingTags: Array.isArray(parsed.pendingTags) ? parsed.pendingTags : []
+      };
+      gameState.selectedSeat = Math.min(Math.max(Number(gameState.selectedSeat) || 1, 1), seatCount);
+      return gameState;
+    }
+
+    function loadSavedGames() {
+      try {
+        const raw = localStorage.getItem(SAVED_GAMES_KEY);
+        const parsed = JSON.parse(raw || "[]");
+        if (!Array.isArray(parsed)) return [];
+        return parsed
+          .map(normalizeSavedGame)
+          .filter(Boolean)
+          .sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function normalizeSavedGame(record) {
+      if (!record || typeof record !== "object" || !record.state) return null;
+      const savedAt = record.savedAt || new Date().toISOString();
+      const snapshot = normalizeGameState(record.state);
+      const boardName = compactText(record.boardName, boardNameForState(snapshot));
+      const dateKey = record.dateKey || dateKeyFromTimestamp(savedAt);
+      const order = Math.max(1, Number(record.order) || 1);
+      return {
+        id: String(record.id || `${savedAt}-${Math.random().toString(36).slice(2, 8)}`),
+        name: compactText(record.name, savedRecordName(dateKey, boardName, order)),
+        dateKey,
+        boardName,
+        order,
+        savedAt,
+        state: snapshot
+      };
+    }
+
+    function normalizeSeatCount(count) {
+      const parsed = Number(count);
+      return allowedSeatCounts.includes(parsed) ? parsed : 12;
+    }
+
+    function normalizePhase(phase) {
+      if (phases.includes(phase)) return phase;
+      if (phase === "白天" || phase === "投票" || phase === "终局") return "第一天白天";
+      if (String(phase || "").includes("晚")) return "第一天白天";
+      return "警上";
+    }
+
+    function roleFaction(role) {
+      return Object.entries(factionRoles).find(([, roleList]) => roleList.includes(role))?.[0] || "third";
+    }
+
+    function normalizeVotePhase(phase) {
+      if (votePhases.includes(phase)) return phase;
+      if (phase === "警上") return "警徽";
+      const text = String(phase || "");
+      const matchedDay = dayPhases.find((item) => text.includes(item));
+      if (matchedDay) return matchedDay;
+      if (text.includes("白天") || phase === "投票" || phase === "终局") return "第一天白天";
+      if (text.includes("晚")) return "第一天白天";
+      return "警徽";
+    }
+
+    function normalizeVotes(votes) {
+      if (!Array.isArray(votes)) return [];
+      return votes.map((vote) => ({
+        ...vote,
+        phase: normalizeVotePhase(vote.phase),
+        target: vote.target ? Number(vote.target) : "",
+        voters: Array.isArray(vote.voters) ? vote.voters.map(Number).filter(Boolean) : []
+      }));
+    }
+
+    function normalizeNotes(notes) {
+      if (!Array.isArray(notes)) return [];
+      return notes.map((note) => ({
+        ...note,
+        phase: normalizePhase(note.phase)
+      }));
+    }
+
+    function normalizeEvents(events) {
+      if (!Array.isArray(events)) return [];
+      return events.map((event) => ({
+        ...event,
+        phase: votePhases.includes(event.phase) ? event.phase : normalizePhase(event.phase)
+      }));
+    }
+
+    function normalizeRoleConfig(roleConfig, seatCount) {
+      if (!Array.isArray(roleConfig) || roleConfig.length === 0) return defaultRoleConfig(seatCount);
+      return roleConfig
+        .map((item) => {
+          const safeRole = roleConfigRoles.includes(item.role) ? item.role : "民";
+          const safeFaction = factionRoles[item.faction]?.includes(safeRole) ? item.faction : roleFaction(safeRole);
+          return {
+            faction: safeFaction,
+            role: safeRole,
+            count: Math.max(0, Number(item.count) || 0)
+          };
+        })
+        .filter((item) => item.count > 0 || item.role);
+    }
+
+    function statusValue(status) {
+      return statuses.includes(status) ? status : "在场";
+    }
+
+    function normalizePhaseStatuses(phaseStatuses) {
+      if (!phaseStatuses || typeof phaseStatuses !== "object") return {};
+      return Object.entries(phaseStatuses).reduce((result, [phase, status]) => {
+        const safePhase = normalizePhase(phase);
+        const safeStatus = statusValue(status);
+        if (isOutStatus(safeStatus)) result[safePhase] = safeStatus;
+        return result;
+      }, {});
+    }
+
+    function normalizePlayers(players, count) {
+      const bySeat = new Map(players.map((player) => [player.seat, player]));
+      return Array.from({ length: count }, (_, index) => {
+        const seat = index + 1;
+        const existing = bySeat.get(seat) || {};
+        const phaseStatuses = normalizePhaseStatuses(existing.phaseStatuses);
+        const legacyStatus = statusValue(existing.status);
+        return {
+          seat,
+          name: `${seat}号`,
+          claimRole: "未标",
+          trueRole: "未标",
+          read: "未知",
+          finalTags: [],
+          status: "在场",
+          phaseStatuses: {},
+          sheriff: false,
+          ...existing,
+          status: latestStatusFromPhaseStatuses(phaseStatuses) || (isOutStatus(legacyStatus) ? legacyStatus : "在场"),
+          phaseStatuses,
+          finalTags: Array.isArray(existing.finalTags) ? existing.finalTags : []
+        };
+      });
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function saveSavedGames() {
+      localStorage.setItem(SAVED_GAMES_KEY, JSON.stringify(savedGames));
+    }
+
+    function playersFor(gameState = state) {
+      return (gameState.players || []).slice(0, normalizeSeatCount(gameState.seatCount));
+    }
+
+    function activePlayers() {
+      return playersFor(state);
+    }
+
+    function playerBySeat(seat) {
+      return playerBySeatIn(state, seat);
+    }
+
+    function playerBySeatIn(gameState, seat) {
+      return (gameState.players || []).find((player) => player.seat === Number(seat));
+    }
+
+    function playerLabel(seat) {
+      return playerLabelIn(state, seat);
+    }
+
+    function playerLabelIn(gameState, seat) {
+      const player = playerBySeatIn(gameState, seat);
+      if (!player) return "未选";
+      const name = String(player.name || "").trim();
+      if (!name || name === `${player.seat}号`) return `${player.seat}号`;
+      return `${player.seat}号 ${name}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function formatTime(ts) {
+      const date = new Date(ts);
+      return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+    }
+
+    function compactText(value, fallback = "暂无") {
+      const text = String(value || "").trim();
+      return text || fallback;
+    }
+
+    function cloneGameState(gameState = state) {
+      return normalizeGameState(JSON.parse(JSON.stringify({
+        ...gameState,
+        pendingTags: []
+      })));
+    }
+
+    function dateKeyFromTimestamp(ts) {
+      const date = new Date(ts);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatDateTime(ts) {
+      const date = new Date(ts);
+      return `${dateKeyFromTimestamp(ts)} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+    }
+
+    function chineseNumber(value) {
+      const map = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
+      const number = Number(value) || 1;
+      if (number <= 10) return map[number];
+      if (number < 20) return `十${map[number - 10]}`;
+      return String(number);
+    }
+
+    function boardNameForState(gameState = state) {
+      const preset = boardPresetById(gameState.preset);
+      if (preset?.name) return preset.name;
+      const title = compactText(gameState.title, "");
+      if (title && title !== "新狼人杀对局") return title;
+      return `${normalizeSeatCount(gameState.seatCount)}人自定义板子`;
+    }
+
+    function savedRecordName(dateKey, boardName, order) {
+      return `${dateKey} ${boardName} 第${chineseNumber(order)}局`;
+    }
+
+    function nextSavedOrder(dateKey, boardName) {
+      return savedGames.filter((record) => record.dateKey === dateKey && record.boardName === boardName).length + 1;
+    }
+
+    let toastTimer = null;
+
+    function showToast(message) {
+      const toast = document.querySelector("#toast");
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add("is-showing");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("is-showing"), 1800);
+    }
+
+    function downloadText(filename, text, type = "application/json") {
+      const blob = new Blob([text], { type });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportGame() {
+      const safeTitle = compactText(state.title, "werewolf-game").replace(/[\\/:*?"<>|\s]+/g, "-");
+      const payload = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        state
+      };
+      downloadText(`${safeTitle}.json`, JSON.stringify(payload, null, 2));
+      showToast("本局数据已导出");
+    }
+
+    function importGameFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        try {
+          const payload = JSON.parse(String(reader.result || "{}"));
+          const importedState = payload.state || payload;
+          state = normalizeGameState({ ...importedState, pendingTags: [] });
+          selectedVoters = new Set();
+          quickModalOpen = false;
+          saveState();
+          renderAll();
+          showToast("本局数据已导入");
+        } catch (error) {
+          showToast("导入失败：JSON格式不对");
+        }
+      });
+      reader.readAsText(file);
+    }
+
+    function saveCurrentGameToHistory() {
+      const savedAt = new Date().toISOString();
+      const dateKey = dateKeyFromTimestamp(savedAt);
+      const boardName = boardNameForState(state);
+      const order = nextSavedOrder(dateKey, boardName);
+      const record = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        name: savedRecordName(dateKey, boardName, order),
+        dateKey,
+        boardName,
+        order,
+        savedAt,
+        state: cloneGameState(state)
+      };
+      savedGames = [record, ...savedGames];
+      selectedSavedGameId = record.id;
+      saveSavedGames();
+      renderSavedGames();
+      showToast(`已保存：${record.name}`);
+    }
+
+    function selectedSavedGame() {
+      if (!savedGames.length) return null;
+      return savedGames.find((record) => record.id === selectedSavedGameId) || savedGames[0];
+    }
+
+    function openSavedGame(recordId) {
+      selectedSavedGameId = recordId;
+      setView("history");
+      renderSavedGames();
+    }
+
+    function loadSelectedSavedGame() {
+      const record = selectedSavedGame();
+      if (!record) {
+        showToast("还没有历史记录");
+        return;
+      }
+      if (!confirm(`载入“${record.name}”为当前局吗？当前未保存的修改会被覆盖。`)) return;
+      state = cloneGameState(record.state);
+      selectedVoters = new Set();
+      quickModalOpen = false;
+      saveState();
+      renderAll();
+      setView("record");
+      showToast("历史局已载入");
+    }
+
+    function deleteSelectedSavedGame() {
+      const record = selectedSavedGame();
+      if (!record) {
+        showToast("还没有历史记录");
+        return;
+      }
+      deleteSavedGame(record.id);
+    }
+
+    function deleteSavedGame(recordId) {
+      const record = savedGames.find((item) => item.id === recordId);
+      if (!record) {
+        showToast("这条历史记录不存在");
+        return;
+      }
+      if (!confirm(`删除历史记录“${record.name}”吗？`)) return;
+      savedGames = savedGames.filter((item) => item.id !== record.id);
+      if (selectedSavedGameId === record.id) selectedSavedGameId = savedGames[0]?.id || "";
+      saveSavedGames();
+      renderSavedGames();
+      showToast("历史记录已删除");
+    }
+
+    async function copySavedGameText() {
+      const output = document.querySelector("#savedGameDetailOutput");
+      if (!output || !output.value.trim()) {
+        showToast("先选择一条历史记录");
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(output.value);
+        showToast("历史详情已复制");
+      } catch (error) {
+        output.focus();
+        output.select();
+        document.execCommand("copy");
+        showToast("历史详情已选中并复制");
+      }
+    }
+
+    async function copyReviewText() {
+      const output = document.querySelector("#reviewOutput");
+      if (!output) return;
+      renderReview();
+      try {
+        await navigator.clipboard.writeText(output.value);
+        showToast("复盘文本已复制");
+      } catch (error) {
+        output.focus();
+        output.select();
+        document.execCommand("copy");
+        showToast("复盘文本已选中并复制");
+      }
+    }
+
+    function setView(view) {
+      closeQuickModal(false);
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.classList.toggle("is-active", tab.dataset.view === view);
+      });
+      document.querySelectorAll(".view").forEach((section) => {
+        section.classList.toggle("is-active", section.id === `view-${view}`);
+      });
+      if (view === "votes") {
+        renderVoteControls();
+        renderVoteOverview();
+      }
+      if (view === "review") renderReview();
+      if (view === "history") renderSavedGames();
+    }
+
+    function setPhase(phase) {
+      state.phase = normalizePhase(phase);
+      document.querySelectorAll(".phase-chip").forEach((chip) => {
+        chip.classList.toggle("is-active", chip.dataset.phase === state.phase);
+      });
+      saveState();
+      renderAll();
+    }
+
+    function latestNotesFor(seat, count = 3) {
+      return state.notes
+        .filter((note) => note.seat === seat && shouldShowPlayerNote(note))
+        .slice(-count)
+        .reverse();
+    }
+
+    function openQuickModal(seat) {
+      state.selectedSeat = Number(seat);
+      state.pendingTags = [];
+      quickModalOpen = true;
+      saveState();
+      renderAll();
+    }
+
+    function isOutStatus(status) {
+      return ["出局", "放逐", "刀死", "毒死", "枪带", "自爆"].includes(status);
+    }
+
+    function phaseIndex(phase) {
+      return phases.indexOf(normalizePhase(phase));
+    }
+
+    function phaseStatusRecordFor(player, phase = state.phase) {
+      const currentIndex = phaseIndex(phase);
+      const entries = phaseStatusEntries(player)
+        .filter(([entryPhase]) => phaseIndex(entryPhase) <= currentIndex);
+      return entries.length ? entries[entries.length - 1] : null;
+    }
+
+    function latestStatusFromPhaseStatuses(phaseStatuses) {
+      const normalized = normalizePhaseStatuses(phaseStatuses);
+      const entries = phases
+        .map((phase) => [phase, normalized[phase]])
+        .filter(([, status]) => isOutStatus(status));
+      return entries.length ? entries[entries.length - 1][1] : "";
+    }
+
+    function phaseStatusFor(player, phase = state.phase) {
+      const record = phaseStatusRecordFor(player, phase);
+      if (record) return record[1];
+      const normalized = normalizePhaseStatuses(player?.phaseStatuses);
+      if (Object.keys(normalized).length) return "在场";
+      const fallback = statusValue(player?.status);
+      return isOutStatus(fallback) ? fallback : "在场";
+    }
+
+    function lockedStatusInfo(player, phase = state.phase) {
+      return phaseStatusRecordFor(player, phase);
+    }
+
+    function phaseStatusEntries(player) {
+      const phaseStatuses = normalizePhaseStatuses(player?.phaseStatuses);
+      return phases
+        .map((phase) => [phase, phaseStatuses[phase]])
+        .filter(([, status]) => status);
+    }
+
+    function phaseStatusSummary(player) {
+      const entries = phaseStatusEntries(player);
+      return entries.length
+        ? entries.map(([phase, status]) => `${phase}${status}`).join(" / ")
+        : "未记录";
+    }
+
+    function closeQuickModal(shouldRender = true) {
+      quickModalOpen = false;
+      document.body.classList.remove("modal-open");
+      document.querySelector("#quickModal")?.classList.remove("is-open");
+      document.querySelector("#quickModal")?.setAttribute("aria-hidden", "true");
+      const panel = document.querySelector("#quickModalPanel");
+      if (panel) panel.innerHTML = "";
+      if (shouldRender) renderQuickModal();
+    }
+
+    function renderBoard() {
+      const board = document.querySelector("#playerBoard");
+      board.innerHTML = activePlayers().map((player) => {
+        const currentStatus = phaseStatusFor(player);
+        const listenLine = state.revealRoles
+          ? `听感：${player.claimRole} · ${player.read} / 真：${player.trueRole}`
+          : `听感：${player.claimRole} · ${player.read}`;
+        const statusClass = isOutStatus(currentStatus) ? "dead" : readClass(player.read);
+        return `
+          <article class="player-card ${player.seat === state.selectedSeat ? "is-selected" : ""} ${statusClass === "dead" ? "is-out" : ""}"
+            data-seat="${player.seat}" data-read="${escapeHtml(player.read)}" aria-label="${escapeHtml(playerLabel(player.seat))}">
+            <div class="player-top">
+              <span class="seat">${player.seat}号</span>
+              <span class="mini-status ${statusClass}">${player.sheriff ? "警长 · " : ""}${escapeHtml(currentStatus)}</span>
+            </div>
+            <div class="roles">
+              <span>${escapeHtml(listenLine)}</span>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      board.querySelectorAll(".player-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          openQuickModal(card.dataset.seat);
+        });
+      });
+    }
+
+    function readClass(read) {
+      if (read === "偏狼" || read === "铁狼") return "wolf";
+      if (read === "偏好" || read === "铁好") return "good";
+      return "";
+    }
+
+    function tagClass(tag) {
+      if (["发查杀", "打某人", "像狼", "冲票", "自爆", "认狼", "聊爆", "冲锋", "站错边", "重点盯", "双刀位", "失误点"].includes(tag)) return "hot";
+      if (["发金水", "保某人", "像好人", "银水", "守护", "身份坐实", "盘得清", "可放", "MVP"].includes(tag)) return "good";
+      if (["跳预", "警徽流", "MVP", "胜负手"].includes(tag)) return "blue";
+      return "";
+    }
+
+    function renderQuickPanel() {
+      const panel = document.querySelector("#quickPanel");
+      const player = playerBySeat(state.selectedSeat);
+      if (!player) {
+        panel.innerHTML = `<div class="empty">先点一个玩家，再开始记录。</div>`;
+        return;
+      }
+
+      const notes = latestNotesFor(player.seat, 1);
+      panel.innerHTML = `
+        <div class="quick-panel-entry">
+          <div>
+            <span class="eyebrow" style="margin:0">当前选中</span>
+            <strong>${player.seat}号 ${escapeHtml(player.name)}</strong>
+          </div>
+          <p class="card-note">${escapeHtml(compactText(notes[0]?.text || notes[0]?.summary || "", "点玩家卡片会弹窗记录发言、听感和状态"))}</p>
+          <button class="btn primary" type="button" id="openQuickModalBtn">打开速记弹窗</button>
+        </div>
+      `;
+
+      panel.querySelector("#openQuickModalBtn").addEventListener("click", () => openQuickModal(player.seat));
+    }
+
+    function quickRecordHtml(player) {
+      const currentStatus = phaseStatusFor(player);
+      const statusLock = lockedStatusInfo(player);
+      const isStatusLocked = Boolean(statusLock);
+      const statusLockedText = statusLock
+        ? `${statusLock[0]}${statusLock[1]}后，后续阶段不可修改状态`
+        : "";
+      return `
+        <div class="selected-player">
+          <div>
+            <span class="eyebrow" style="margin:0">快速记录</span>
+            <strong>${player.seat}号 ${escapeHtml(player.name)}</strong>
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <label class="field">
+            <span>听感身份</span>
+            <select id="quickClaimRole">${roleOptions(player.claimRole)}</select>
+          </label>
+          <label class="field">
+            <span>真实身份</span>
+            <select id="quickTrueRole">${roleOptions(player.trueRole)}</select>
+          </label>
+          <label class="field">
+            <span>${escapeHtml(state.phase)}状态</span>
+            <select id="quickStatus" ${isStatusLocked ? "disabled" : ""}>${statuses.map((status) => `<option ${status === currentStatus ? "selected" : ""}>${status}</option>`).join("")}</select>
+          </label>
+        </div>
+
+        <p class="card-note" style="margin-top:8px">阶段状态：${escapeHtml(phaseStatusSummary(player))}</p>
+        ${isStatusLocked ? `<p class="card-note" style="margin-top:6px">${escapeHtml(statusLockedText)}</p>` : ""}
+
+        <div style="margin-top:12px">
+          <label>听感 / 标签</label>
+          <div class="quick-actions" style="margin-top:7px">
+            ${reads.map((read) => `<button class="chip ${read === player.read ? "is-selected" : ""}" type="button" data-read="${read}">${read}</button>`).join("")}
+          </div>
+          <div class="chips" style="margin-top:7px">
+            ${summaryTags.map((tag) => `<button class="chip summary-tag ${player.finalTags?.includes(tag) ? "is-selected" : ""} ${tagClass(tag)}" type="button" data-final-tag="${tag}" aria-pressed="${player.finalTags?.includes(tag) ? "true" : "false"}">${tag}</button>`).join("")}
+          </div>
+        </div>
+
+        <label class="wide-field" style="margin-top:12px">
+          <span>补一句发言要点</span>
+          <textarea id="quickNoteText" placeholder="例如：给6金水，压7号后置位，语气强势"></textarea>
+        </label>
+
+        <div class="status-actions" style="margin-top:10px">
+          <button class="btn primary" type="button" id="saveNoteBtn">保存本句</button>
+          <button class="btn ghost" type="button" id="sheriffBtn">${player.sheriff ? "取消警长" : "设为警长"}</button>
+          <button class="btn danger" type="button" id="markOutBtn" ${isStatusLocked ? "disabled" : ""}>标记出局</button>
+        </div>
+
+        <div style="margin-top:12px">
+          <label>快捷事件</label>
+          <div class="quick-actions" style="margin-top:7px">
+            ${["放逐", "刀死", "毒死", "枪带", "自爆", "在场"].map((status) => `<button class="btn ${status === "在场" ? "ghost" : "danger"}" type="button" data-status-shortcut="${status}" ${isStatusLocked ? "disabled" : ""}>${status}</button>`).join("")}
+          </div>
+        </div>
+
+        <div style="margin-top:14px">
+          <div class="panel-head" style="margin-bottom:8px">
+            <div><h3>${player.seat}号分阶段速记</h3></div>
+            <p>只看警上和白天</p>
+          </div>
+          <div class="player-note-list">${playerNotesHtml(player.seat)}</div>
+        </div>
+      `;
+    }
+
+    function bindQuickRecordEvents(panel, player) {
+      panel.querySelector("#quickClaimRole").addEventListener("change", (event) => updatePlayer(player.seat, { claimRole: event.target.value }));
+      panel.querySelector("#quickTrueRole").addEventListener("change", (event) => updatePlayer(player.seat, { trueRole: event.target.value }));
+      panel.querySelector("#quickStatus").addEventListener("change", (event) => updatePlayerStatus(player.seat, event.target.value));
+      panel.querySelectorAll("[data-read]").forEach((button) => {
+        button.addEventListener("click", () => updatePlayer(player.seat, { read: button.dataset.read }));
+      });
+      panel.querySelectorAll("[data-final-tag]").forEach((button) => {
+        button.addEventListener("click", () => toggleFinalTag(player.seat, button.dataset.finalTag));
+      });
+      panel.querySelectorAll("[data-status-shortcut]").forEach((button) => {
+        button.addEventListener("click", () => updatePlayerStatus(player.seat, button.dataset.statusShortcut));
+      });
+      panel.querySelectorAll("[data-edit-note]").forEach((button) => {
+        button.addEventListener("click", () => editNote(Number(button.dataset.editNote)));
+      });
+      panel.querySelectorAll("[data-delete-note]").forEach((button) => {
+        button.addEventListener("click", () => deleteNote(Number(button.dataset.deleteNote)));
+      });
+      panel.querySelector("#saveNoteBtn").addEventListener("click", () => saveQuickNote(panel));
+      panel.querySelector("#sheriffBtn").addEventListener("click", () => toggleSheriff(player.seat));
+      panel.querySelector("#markOutBtn").addEventListener("click", () => updatePlayerStatus(player.seat, "出局"));
+    }
+
+    function renderQuickModal() {
+      const modal = document.querySelector("#quickModal");
+      const panel = document.querySelector("#quickModalPanel");
+      const title = document.querySelector("#quickModalTitle");
+      const player = playerBySeat(state.selectedSeat);
+      if (!modal || !panel || !title) return;
+
+      if (!quickModalOpen || !player) {
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("modal-open");
+        panel.innerHTML = "";
+        return;
+      }
+
+      title.textContent = `${player.seat}号 ${player.name}`;
+      panel.innerHTML = quickRecordHtml(player);
+      bindQuickRecordEvents(panel, player);
+      modal.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
+    }
+
+    function playerNotesHtml(seat) {
+      const visiblePhases = playerNotePhases();
+      const notesByPhase = visiblePhases.map((phase) => ({
+        phase,
+        notes: state.notes
+          .filter((note) => note.seat === seat && note.phase === phase)
+          .slice()
+          .sort((a, b) => a.ts - b.ts)
+      })).filter((group) => group.notes.length);
+
+      if (!notesByPhase.length) {
+        return `<div class="empty">还没有这个玩家的警上/白天速记。点标签或补一句后，会按阶段显示在这里。</div>`;
+      }
+
+      return notesByPhase.map((group) => {
+        const body = group.notes.map((note) => {
+              const tags = (note.tags || []).map((tag) => `<span class="tag ${tagClass(tag)}">${escapeHtml(tag)}</span>`).join("");
+              const text = note.text || note.summary.replace(`${playerLabel(seat)}：`, "");
+              return `
+                <article class="player-note-item">
+                  <div class="player-note-meta">
+                    <span>${formatTime(note.ts)}</span>
+                    ${tags}
+                    <span class="inline-tools">
+                      <button class="btn ghost" type="button" data-edit-note="${note.id}">编辑</button>
+                      <button class="btn danger" type="button" data-delete-note="${note.id}">删</button>
+                    </span>
+                  </div>
+                  <p>${escapeHtml(compactText(text, "无补充文字"))}</p>
+                </article>
+              `;
+            }).join("");
+        return `
+          <section class="phase-note-section">
+            <h4>${escapeHtml(group.phase)}</h4>
+            ${body}
+          </section>
+        `;
+      }).join("");
+    }
+
+    function rebuildNoteSummary(note) {
+      const tagText = note.tags?.length ? note.tags.join("、") : "发言";
+      const targetText = note.target ? ` → ${playerLabel(note.target)}` : "";
+      return `${playerLabel(note.seat)}：${tagText}${targetText}${note.text ? `；${note.text}` : ""}`;
+    }
+
+    function editNote(noteId) {
+      const note = state.notes.find((item) => item.id === noteId);
+      if (!note) return;
+      const previousSummary = note.summary;
+      const nextText = prompt("编辑这条速记", note.text || note.summary.replace(`${playerLabel(note.seat)}：`, ""));
+      if (nextText === null) return;
+      note.text = nextText.trim();
+      note.summary = rebuildNoteSummary(note);
+      const event = state.events.find((item) => item.noteId === note.id)
+        || state.events.find((item) => item.type === "发言" && item.ts === note.ts)
+        || state.events.find((item) => item.type === "发言" && item.text === previousSummary);
+      if (event) event.text = note.summary;
+      saveState();
+      renderAll();
+      showToast("速记已更新");
+    }
+
+    function deleteNote(noteId) {
+      const note = state.notes.find((item) => item.id === noteId);
+      if (!note || !confirm("删除这条速记吗？")) return;
+      state.notes = state.notes.filter((item) => item.id !== noteId);
+      state.events = state.events.filter((event) => event.noteId !== noteId && !(event.type === "发言" && event.ts === note.ts));
+      saveState();
+      renderAll();
+      showToast("速记已删除");
+    }
+
+    function playerNotePhases() {
+      return phases.filter((phase) => phase === "警上" || phase.includes("白天"));
+    }
+
+    function shouldShowPlayerNote(note) {
+      return note.phase === "警上" || String(note.phase || "").includes("白天");
+    }
+
+    function roleOptions(selected) {
+      return roles.map((role) => `<option ${role === selected ? "selected" : ""}>${role}</option>`).join("");
+    }
+
+    function updatePlayer(seat, patch) {
+      const player = playerBySeat(seat);
+      Object.assign(player, patch);
+      saveState();
+      renderAll();
+      showToast("玩家信息已更新");
+    }
+
+    function updatePlayerStatus(seat, status) {
+      const player = playerBySeat(seat);
+      player.phaseStatuses = normalizePhaseStatuses(player.phaseStatuses);
+      const statusLock = lockedStatusInfo(player);
+      if (statusLock) {
+        showToast(`${playerLabel(seat)} 已在${statusLock[0]}${statusLock[1]}，后续阶段不可改状态`);
+        renderQuickModal();
+        return;
+      }
+      const safeStatus = statusValue(status);
+      if (safeStatus === "在场") {
+        delete player.phaseStatuses[state.phase];
+        player.status = latestStatusFromPhaseStatuses(player.phaseStatuses) || "在场";
+        saveState();
+        renderAll();
+        showToast(`${playerLabel(seat)} 保持在场`);
+        return;
+      }
+      player.phaseStatuses[state.phase] = safeStatus;
+      player.status = latestStatusFromPhaseStatuses(player.phaseStatuses) || safeStatus;
+      addEvent({
+        type: "状态",
+        actor: seat,
+        target: "",
+        text: `${playerLabel(seat)} 在${state.phase}标记为 ${safeStatus}`,
+        silent: true
+      });
+      saveState();
+      renderAll();
+      showToast(`${playerLabel(seat)} ${state.phase}已标记为 ${safeStatus}`);
+    }
+
+    function toggleFinalTag(seat, tag) {
+      const player = playerBySeat(seat);
+      if (!player) return;
+      player.finalTags = Array.isArray(player.finalTags) ? player.finalTags : [];
+      if (player.finalTags.includes(tag)) {
+        player.finalTags = player.finalTags.filter((item) => item !== tag);
+      } else {
+        player.finalTags.push(tag);
+      }
+      saveState();
+      renderAll();
+    }
+
+    function saveQuickNote(root = document) {
+      const player = playerBySeat(state.selectedSeat);
+      const text = root.querySelector("#quickNoteText")?.value.trim() || "";
+      if (!player || !text) return;
+
+      const noteId = Date.now();
+      const eventId = noteId + 1;
+      const tagText = "发言";
+      const summary = `${playerLabel(player.seat)}：${tagText}；${text}`;
+      state.notes.push({
+        id: noteId,
+        eventId,
+        ts: noteId,
+        phase: state.phase,
+        seat: player.seat,
+        target: "",
+        tags: [],
+        text,
+        summary
+      });
+      state.events.push({
+        id: eventId,
+        noteId,
+        ts: noteId,
+        phase: state.phase,
+        type: "发言",
+        actor: player.seat,
+        target: "",
+        text: summary
+      });
+      state.pendingTags = [];
+      saveState();
+      renderAll();
+      showToast("速记已保存");
+    }
+
+    function toggleSheriff(seat) {
+      const player = playerBySeat(seat);
+      const willBeSheriff = !player.sheriff;
+      state.players.forEach((item) => { item.sheriff = false; });
+      player.sheriff = willBeSheriff;
+      if (willBeSheriff) {
+        addEvent({
+          type: "警长",
+          actor: seat,
+          target: "",
+          text: `${playerLabel(seat)} 当选警长`,
+          silent: true
+        });
+      }
+      saveState();
+      renderAll();
+      showToast(willBeSheriff ? `${playerLabel(seat)} 已设为警长` : "已取消警长");
+    }
+
+    function addEvent({ type, actor, target, text, silent = false }) {
+      const finalText = text || buildEventText(type, actor, target);
+      state.events.push({
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        ts: Date.now(),
+        phase: state.phase,
+        type,
+        actor: actor ? Number(actor) : "",
+        target: target ? Number(target) : "",
+        text: finalText
+      });
+      if (!silent) {
+        saveState();
+        renderAll();
+      }
+    }
+
+    function buildEventText(type, actor, target) {
+      const actorText = actor ? playerLabel(actor) : "本局";
+      const targetText = target ? playerLabel(target) : "";
+      if (targetText) return `${actorText} ${type} ${targetText}`;
+      return `${actorText}：${type}`;
+    }
+
+    function renderSetup() {
+      document.querySelector("#seatCountInput").value = state.seatCount;
+      document.querySelector("#gameTitleInput").value = state.title;
+      document.querySelector("#resultInput").value = state.result;
+      document.querySelector("#godRuleInput").value = state.ruleNotes.god || "";
+      document.querySelector("#wolfRuleInput").value = state.ruleNotes.wolf || "";
+      document.querySelector("#thirdRuleInput").value = state.ruleNotes.third || "";
+      renderBoardPresets();
+      renderRoleConfig();
+
+      const rows = document.querySelector("#setupRows");
+      rows.innerHTML = `
+        <div class="table-map">
+          <div class="table-center">
+            <div>
+              <strong>${state.seatCount}人方桌</strong><br>
+              <span>只填名字，不分配身份</span>
+            </div>
+          </div>
+          ${activePlayers().map((player, index) => {
+            const position = tableSeatPosition(index, state.seatCount);
+            return `
+              <div class="table-seat" data-seat="${player.seat}" style="left:${position.left}%;top:${position.top}%">
+                <span class="seat">${player.seat}号</span>
+                <input data-field="name" value="${escapeHtml(player.name)}" placeholder="${player.seat}号玩家名">
+              </div>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      rows.querySelectorAll("input").forEach((input) => {
+        input.addEventListener("change", () => {
+          const row = input.closest(".table-seat");
+          updatePlayer(Number(row.dataset.seat), { [input.dataset.field]: input.value });
+        });
+      });
+    }
+
+    function tableSeatPosition(index, count) {
+      const topCount = Math.ceil(count / 4);
+      const rightCount = Math.ceil((count - topCount) / 3);
+      const bottomCount = Math.ceil((count - topCount - rightCount) / 2);
+      const leftCount = count - topCount - rightCount - bottomCount;
+
+      if (index < topCount) {
+        return spreadPosition(index, topCount, 18, 82, 10, "top");
+      }
+      if (index < topCount + rightCount) {
+        return spreadPosition(index - topCount, rightCount, 22, 78, 88, "right");
+      }
+      if (index < topCount + rightCount + bottomCount) {
+        return spreadPosition(index - topCount - rightCount, bottomCount, 82, 18, 90, "bottom");
+      }
+      return spreadPosition(index - topCount - rightCount - bottomCount, leftCount, 78, 22, 12, "left");
+    }
+
+    function spreadPosition(index, count, start, end, fixed, side) {
+      const ratio = count <= 1 ? 0.5 : index / (count - 1);
+      const moving = start + (end - start) * ratio;
+      if (side === "top" || side === "bottom") return { left: moving, top: fixed };
+      return { left: fixed, top: moving };
+    }
+
+    function boardPresetById(id) {
+      return boardPresets.find((preset) => preset.id === id);
+    }
+
+    function renderBoardPresets() {
+      const list = document.querySelector("#boardPresetList");
+      if (!list) return;
+      list.innerHTML = boardPresets.map((preset) => {
+        const countText = preset.deckSize && preset.deckSize !== preset.seatCount
+          ? `${preset.seatCount}人/${preset.deckSize}张`
+          : `${preset.seatCount}人`;
+        const summary = preset.roleConfig.map((item) => `${item.role}${item.count}`).join("、");
+        return `<button class="chip ${state.preset === preset.id ? "is-selected" : ""}" type="button" data-board-preset="${preset.id}" title="${escapeHtml(summary)}">${escapeHtml(preset.name)} · ${countText}</button>`;
+      }).join("");
+
+      list.querySelectorAll("[data-board-preset]").forEach((button) => {
+        button.addEventListener("click", () => applyBoardPreset(button.dataset.boardPreset));
+      });
+    }
+
+    function applyBoardPreset(id) {
+      const preset = boardPresetById(id);
+      if (!preset) return;
+      state.preset = preset.id;
+      state.seatCount = preset.seatCount;
+      state.players = normalizePlayers(state.players, preset.seatCount);
+      state.selectedSeat = Math.min(state.selectedSeat, preset.seatCount);
+      state.roleConfig = preset.roleConfig.map((item) => ({ ...item }));
+      state.ruleNotes = {
+        god: preset.ruleNotes?.god || "",
+        wolf: preset.ruleNotes?.wolf || "",
+        third: preset.ruleNotes?.third || ""
+      };
+      state.title = preset.name;
+      saveState();
+      renderAll();
+      showToast(`已套用${preset.name}`);
+    }
+
+    function renderRoleConfig() {
+      const list = document.querySelector("#roleConfigRows");
+      const total = roleConfigTotal();
+      const preset = boardPresetById(state.preset);
+      const targetTotal = preset?.deckSize || state.seatCount;
+      const diff = targetTotal - total;
+      const targetText = preset?.deckSize && preset.deckSize !== state.seatCount
+        ? `${targetTotal}张牌 / ${state.seatCount}人`
+        : `${targetTotal}/${state.seatCount}`;
+      const status = diff === 0
+        ? (preset?.deckSize && preset.deckSize !== state.seatCount ? `牌库已配满 ${targetText}` : `已配满 ${total}/${state.seatCount}`)
+        : diff > 0
+          ? `还差 ${diff} 个身份（${total}/${targetTotal}）`
+          : `超出 ${Math.abs(diff)} 个身份（${total}/${targetTotal}）`;
+
+      document.querySelector("#roleConfigStatus").textContent = status;
+      document.querySelector("#roleConfigStatus").style.color = diff === 0 ? "var(--good)" : "var(--danger)";
+      list.innerHTML = Object.entries(factionLabels).map(([faction, label]) => {
+        const items = state.roleConfig
+          .map((item, index) => ({ ...item, index }))
+          .filter((item) => item.faction === faction);
+        return `
+          <section class="faction-card" data-faction="${faction}">
+            <div class="faction-head">
+              <strong>${label}</strong>
+              <span class="faction-total">${factionTotal(faction)}人</span>
+            </div>
+            ${items.length ? items.map((item) => `
+              <div class="role-config-row" data-index="${item.index}">
+                <select data-role-index="${item.index}">
+                  ${factionRoles[faction].map((role) => `<option ${role === item.role ? "selected" : ""}>${role}</option>`).join("")}
+                </select>
+                <input type="number" min="0" max="15" value="${item.count}" data-count-index="${item.index}" aria-label="${escapeHtml(item.role)}数量">
+                <button class="btn ghost" type="button" data-remove-role="${item.index}">删</button>
+              </div>
+            `).join("") : "<div class=\"empty\" style=\"min-height:76px\">未配置</div>"}
+          </section>
+        `;
+      }).join("");
+
+      list.querySelectorAll("[data-role-index]").forEach((select) => {
+        select.addEventListener("change", () => {
+          const index = Number(select.dataset.roleIndex);
+          state.preset = "custom";
+          state.roleConfig[index].role = select.value;
+          state.roleConfig[index].faction = roleFaction(select.value);
+          saveState();
+          renderAll();
+        });
+      });
+      list.querySelectorAll("[data-count-index]").forEach((input) => {
+        input.addEventListener("change", () => {
+          state.preset = "custom";
+          state.roleConfig[Number(input.dataset.countIndex)].count = Math.max(0, Number(input.value) || 0);
+          state.roleConfig = normalizeRoleConfig(state.roleConfig, state.seatCount);
+          saveState();
+          renderAll();
+        });
+      });
+      list.querySelectorAll("[data-remove-role]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.preset = "custom";
+          state.roleConfig.splice(Number(button.dataset.removeRole), 1);
+          if (!state.roleConfig.length) state.roleConfig.push({ faction: "civil", role: "民", count: state.seatCount });
+          saveState();
+          renderAll();
+        });
+      });
+    }
+
+    function roleConfigTotal() {
+      return state.roleConfig.reduce((sum, item) => sum + (Number(item.count) || 0), 0);
+    }
+
+    function factionTotal(faction) {
+      return state.roleConfig
+        .filter((item) => item.faction === faction)
+        .reduce((sum, item) => sum + (Number(item.count) || 0), 0);
+    }
+
+    function fillCivilianSlots() {
+      state.preset = "custom";
+      const totalWithoutCivilian = state.roleConfig
+        .filter((item) => item.faction !== "civil")
+        .reduce((sum, item) => sum + (Number(item.count) || 0), 0);
+      const civilianCount = Math.max(0, state.seatCount - totalWithoutCivilian);
+      const civilian = state.roleConfig.find((item) => item.faction === "civil" && item.role === "民");
+      if (civilian) civilian.count = civilianCount;
+      else state.roleConfig.push({ faction: "civil", role: "民", count: civilianCount });
+      state.roleConfig = normalizeRoleConfig(state.roleConfig, state.seatCount);
+      saveState();
+      renderAll();
+    }
+
+    function boardConfigSummary(gameState = state) {
+      const groups = (gameState.roleConfig || [])
+        .filter((item) => Number(item.count) > 0)
+        .reduce((groups, item) => {
+          const label = factionLabels[item.faction] || "其他";
+          groups[label] = groups[label] || [];
+          groups[label].push(`${item.role}${item.count}`);
+          return groups;
+        }, {});
+      const text = Object.entries(groups)
+        .map(([faction, items]) => `${faction}：${items.join("、")}`)
+        .join("；");
+      return text || "未配置";
+    }
+
+    function defaultVotePhase() {
+      if (state.phase === "警上") return "警徽";
+      if (dayPhases.includes(state.phase)) return state.phase;
+      return "警徽";
+    }
+
+    function voteRoundPlaceholder(phase) {
+      return phase === "警徽" ? "警徽票 / 放逐票 / PK票" : `${phase}放逐票 / PK票`;
+    }
+
+    function renderVoteControls() {
+      const phaseInput = document.querySelector("#votePhaseInput");
+      const targetInput = document.querySelector("#voteTargetInput");
+      const roundInput = document.querySelector("#voteRoundInput");
+      const voterGrid = document.querySelector("#voterGrid");
+      if (!phaseInput || !targetInput || !roundInput || !voterGrid) return;
+
+      const previousPhase = votePhases.includes(phaseInput.value) ? phaseInput.value : defaultVotePhase();
+      const previousTarget = targetInput.value;
+      phaseInput.innerHTML = votePhases.map((phase) => `<option ${phase === previousPhase ? "selected" : ""}>${phase}</option>`).join("");
+      roundInput.placeholder = voteRoundPlaceholder(phaseInput.value || previousPhase);
+      targetInput.innerHTML = `<option value="">请选择</option>${activePlayers().map((player) => `<option value="${player.seat}">${player.seat}号 ${escapeHtml(player.name)}</option>`).join("")}`;
+      if (activePlayers().some((player) => String(player.seat) === previousTarget)) targetInput.value = previousTarget;
+
+      voterGrid.innerHTML = activePlayers().map((player) => `
+        <label class="voter">
+          <input type="checkbox" value="${player.seat}" ${selectedVoters.has(player.seat) ? "checked" : ""}>
+          <span>${player.seat}号 ${escapeHtml(player.name)}</span>
+        </label>
+      `).join("");
+
+      voterGrid.querySelectorAll("input").forEach((checkbox) => {
+        checkbox.addEventListener("change", () => {
+          const seat = Number(checkbox.value);
+          if (checkbox.checked) selectedVoters.add(seat);
+          else selectedVoters.delete(seat);
+        });
+      });
+    }
+
+    function saveVote() {
+      const phase = normalizeVotePhase(document.querySelector("#votePhaseInput")?.value || defaultVotePhase());
+      const round = compactText(document.querySelector("#voteRoundInput")?.value, phase === "警徽" ? "警徽票" : `${phase}票型`);
+      const target = document.querySelector("#voteTargetInput")?.value;
+      if (!target || selectedVoters.size === 0) return;
+
+      const voteId = Date.now();
+      const eventId = voteId + 1;
+      const voters = [...selectedVoters].sort((a, b) => a - b);
+      const vote = {
+        id: voteId,
+        eventId,
+        ts: voteId,
+        phase,
+        round,
+        target: Number(target),
+        voters
+      };
+      state.votes.push(vote);
+      state.events.push({
+        id: eventId,
+        voteId,
+        ts: voteId,
+        phase,
+        type: "票型",
+        actor: "",
+        target: Number(target),
+        text: `${round}：${voters.map(playerLabel).join("、")} 投给 ${playerLabel(target)}`
+      });
+      selectedVoters = new Set();
+      const roundInput = document.querySelector("#voteRoundInput");
+      if (roundInput) roundInput.value = "";
+      saveState();
+      renderAll();
+      showToast("票型已保存");
+    }
+
+    function deleteVote(voteId) {
+      const vote = state.votes.find((item) => item.id === voteId);
+      if (!vote || !confirm("删除这条票型吗？")) return;
+      state.votes = state.votes.filter((item) => item.id !== voteId);
+      state.events = state.events.filter((event) => event.voteId !== voteId && !(event.type === "票型" && event.ts === vote.ts));
+      saveState();
+      renderAll();
+      showToast("票型已删除");
+    }
+
+    function clearVotes() {
+      if (!state.votes.length) {
+        showToast("当前没有票型记录");
+        return;
+      }
+      if (!confirm("清空所有票型记录吗？")) return;
+      const voteIds = new Set(state.votes.map((vote) => vote.id));
+      const voteTimes = new Set(state.votes.map((vote) => vote.ts));
+      state.votes = [];
+      state.events = state.events.filter((event) => {
+        if (event.voteId && voteIds.has(event.voteId)) return false;
+        return !(event.type === "票型" && voteTimes.has(event.ts));
+      });
+      selectedVoters = new Set();
+      saveState();
+      renderAll();
+      showToast("票型已清空");
+    }
+
+    function votesGroupedByPhase(gameState = state) {
+      const groups = new Map(votePhases.map((phase) => [phase, []]));
+      (gameState.votes || []).forEach((vote) => {
+        const phase = normalizeVotePhase(vote.phase);
+        const group = groups.get(phase) || groups.get("警徽");
+        group.push({ ...vote, phase });
+      });
+      groups.forEach((items) => items.sort((a, b) => a.ts - b.ts));
+      return groups;
+    }
+
+    function renderVoteOverview() {
+      const overview = document.querySelector("#voteOverview");
+      if (!overview) return;
+      const max = Math.max(...state.votes.map((vote) => vote.voters.length), 1);
+      const groups = votesGroupedByPhase();
+      overview.innerHTML = votePhases.map((phase) => {
+        const votes = groups.get(phase) || [];
+        return `
+          <section class="vote-group">
+            <div class="vote-group-head">
+              <h3>${escapeHtml(phase)}</h3>
+              <span class="vote-count-pill">${votes.length}条</span>
+            </div>
+            ${votes.length ? votes.map((vote) => `
+              <article class="history-card">
+                <div class="player-note-meta">
+                  <h3 style="margin:0">${escapeHtml(vote.round)}</h3>
+                  <span class="inline-tools">
+                    <button class="btn danger" type="button" data-delete-vote="${vote.id}">删</button>
+                  </span>
+                </div>
+                <p><b>${playerLabel(vote.target)}</b> 获得 ${vote.voters.length} 票</p>
+                <p>投票人：${vote.voters.map(playerLabel).join("、")}</p>
+                <div class="vote-bar"><div class="vote-fill" style="width:${Math.max(8, vote.voters.length / max * 100)}%"></div></div>
+              </article>
+            `).join("") : "<div class=\"empty\" style=\"min-height:74px\">暂无票型</div>"}
+          </section>
+        `;
+      }).join("");
+      overview.querySelectorAll("[data-delete-vote]").forEach((button) => {
+        button.addEventListener("click", () => deleteVote(Number(button.dataset.deleteVote)));
+      });
+    }
+
+    function renderTimeline() {
+      const items = state.events.slice().reverse();
+      const html = items.length ? items.map((event) => `
+        <article class="timeline-item">
+          <time>${escapeHtml(event.phase)}<br>${formatTime(event.ts)}</time>
+          <p><b>${escapeHtml(event.type)}</b>：${escapeHtml(event.text)}</p>
+        </article>
+      `).join("") : `<div class="empty">还没有记录。点玩家加标签，或保存票型后会出现在这里。</div>`;
+
+      document.querySelector("#miniTimeline").innerHTML = items.slice(0, 8).length
+        ? items.slice(0, 8).map((event) => `
+          <article class="timeline-item">
+            <time>${escapeHtml(event.phase)}<br>${formatTime(event.ts)}</time>
+            <p>${escapeHtml(event.text)}</p>
+          </article>
+        `).join("")
+        : `<div class="empty">先记录第一条发言。</div>`;
+      const eventTimeline = document.querySelector("#eventTimeline");
+      if (eventTimeline) eventTimeline.innerHTML = html;
+    }
+
+    function savedGameCardHtml(record) {
+      const snapshot = record.state || defaultState();
+      const resultText = compactText(snapshot.result, "未填赛果");
+      const noteCount = (snapshot.notes || []).length;
+      const voteCount = (snapshot.votes || []).length;
+      const eventCount = (snapshot.events || []).length;
+      return `
+        <article class="saved-game-card ${record.id === selectedSavedGameId ? "is-selected" : ""}">
+          <button class="saved-game-main" type="button" data-open-saved="${record.id}">
+            <strong>${escapeHtml(record.name)}</strong>
+            <span>${escapeHtml(formatDateTime(record.savedAt))} · ${escapeHtml(resultText)}</span>
+            <p>${escapeHtml(snapshot.seatCount)}人 · ${escapeHtml(record.boardName)} · 发言${noteCount} / 票型${voteCount} / 事件${eventCount}</p>
+          </button>
+          <button class="btn danger saved-game-delete" type="button" data-delete-saved="${record.id}" aria-label="删除${escapeHtml(record.name)}">删</button>
+        </article>
+      `;
+    }
+
+    function renderSavedGames() {
+      if (savedGames.length && !savedGames.some((record) => record.id === selectedSavedGameId)) {
+        selectedSavedGameId = savedGames[0].id;
+      }
+
+      const recent = document.querySelector("#recentSavedGames");
+      if (recent) {
+        const recentItems = savedGames.slice(0, 4);
+        recent.innerHTML = recentItems.length
+          ? recentItems.map(savedGameCardHtml).join("")
+          : `<div class="empty" style="min-height:92px">还没有保存过对局。点“保存当前局”后，这里会出现历史记录。</div>`;
+      }
+
+      const list = document.querySelector("#savedGameList");
+      if (list) {
+        list.innerHTML = savedGames.length
+          ? savedGames.map(savedGameCardHtml).join("")
+          : `<div class="empty">还没有历史对局。保存一局后，会按日期、板子和第几局自动命名。</div>`;
+      }
+
+      document.querySelectorAll("[data-open-saved]").forEach((button) => {
+        button.addEventListener("click", () => openSavedGame(button.dataset.openSaved));
+      });
+      document.querySelectorAll("[data-delete-saved]").forEach((button) => {
+        button.addEventListener("click", () => deleteSavedGame(button.dataset.deleteSaved));
+      });
+
+      const detailTitle = document.querySelector("#savedGameDetailTitle");
+      const detailMeta = document.querySelector("#savedGameDetailMeta");
+      const detailOutput = document.querySelector("#savedGameDetailOutput");
+      if (!detailTitle || !detailMeta || !detailOutput) return;
+
+      const record = selectedSavedGame();
+      if (!record) {
+        detailTitle.textContent = "历史详情";
+        detailMeta.textContent = "点击左侧记录查看";
+        detailOutput.value = "";
+        return;
+      }
+
+      detailTitle.textContent = record.name;
+      detailMeta.textContent = `${formatDateTime(record.savedAt)} · ${record.boardName}`;
+      detailOutput.value = buildReviewText(record.state);
+    }
+
+    function renderReview() {
+      const summary = document.querySelector("#playerSummary");
+      summary.innerHTML = activePlayers().map((player) => {
+        const notes = state.notes.filter((note) => note.seat === player.seat && shouldShowPlayerNote(note));
+        const topNotes = notes.slice(-3).map((note) => note.summary).join(" / ");
+        const finalTags = player.finalTags?.length ? player.finalTags.join("、") : "未标";
+        return `
+          <article class="history-card">
+            <h3>${player.seat}号 ${escapeHtml(player.name)}</h3>
+            <p>听感身份：${escapeHtml(player.claimRole)}；最新状态：${escapeHtml(player.status)}${player.sheriff ? "；警长" : ""}；标签：${escapeHtml(finalTags)}</p>
+            <p>阶段状态：${escapeHtml(phaseStatusSummary(player))}</p>
+            <p>${escapeHtml(compactText(topNotes, "暂无发言记录"))}</p>
+          </article>
+        `;
+      }).join("");
+
+      document.querySelector("#reviewOutput").value = buildReviewText();
+    }
+
+    function buildReviewText(gameState = state) {
+      const players = playersFor(gameState);
+      const label = (seat) => playerLabelIn(gameState, seat);
+      const lines = [];
+      lines.push(`# ${gameState.title || "狼人杀复盘"}`);
+      lines.push("");
+      lines.push(`结果：${gameState.result || "未填写"}`);
+      lines.push(`人数/板子：${gameState.seatCount}人 / ${boardConfigSummary(gameState)}`);
+      lines.push("");
+      lines.push("## 规则说明");
+      lines.push(`- 神职：${gameState.ruleNotes?.god || "未填写"}`);
+      lines.push(`- 狼人：${gameState.ruleNotes?.wolf || "未填写"}`);
+      lines.push(`- 三方/特殊：${gameState.ruleNotes?.third || "未填写"}`);
+      lines.push("");
+      lines.push("## 身份表");
+      players.forEach((player) => {
+        const finalTags = player.finalTags?.length ? player.finalTags.join("、") : "未标";
+        lines.push(`${player.seat}号 ${player.name}：听感身份${player.claimRole} / 最新状态${player.status}${player.sheriff ? " / 警长" : ""} / 阶段状态${phaseStatusSummary(player)} / 标签${finalTags} / 真${player.trueRole}`);
+      });
+
+      lines.push("");
+      lines.push("## 票型");
+      if ((gameState.votes || []).length) {
+        votesGroupedByPhase(gameState).forEach((votes, phase) => {
+          if (!votes.length) return;
+          lines.push(`### ${phase}`);
+          votes.forEach((vote) => {
+            lines.push(`- ${vote.round}：${vote.voters.map(label).join("、")} -> ${label(vote.target)}，共${vote.voters.length}票`);
+          });
+        });
+      } else {
+        lines.push("- 暂无票型记录");
+      }
+
+      lines.push("");
+      lines.push("## 时间线");
+      if ((gameState.events || []).length) {
+        gameState.events.forEach((event) => {
+          lines.push(`- [${event.phase}] ${event.text}`);
+        });
+      } else {
+        lines.push("- 暂无事件记录");
+      }
+
+      lines.push("");
+      lines.push("## 玩家发言摘要");
+      players.forEach((player) => {
+        const notes = (gameState.notes || []).filter((note) => note.seat === player.seat && shouldShowPlayerNote(note));
+        if (!notes.length) {
+          lines.push(`- ${player.seat}号 ${player.name}：暂无`);
+          return;
+        }
+        const grouped = playerNotePhases()
+          .map((phase) => {
+            const phaseNotes = notes.filter((note) => note.phase === phase);
+            if (!phaseNotes.length) return "";
+            return `${phase}：${phaseNotes.map((note) => note.summary.replace(`${label(player.seat)}：`, "")).join("；")}`;
+          })
+          .filter(Boolean)
+          .join(" / ");
+        lines.push(`- ${player.seat}号 ${player.name}：${grouped}`);
+      });
+      return lines.join("\n");
+    }
+
+    function renderLabels() {
+      document.querySelector("#currentPhaseLabel").textContent = state.phase;
+      document.querySelector("#currentPlayerLabel").textContent = playerLabel(state.selectedSeat);
+      document.querySelector("#boardTitle").textContent = `${state.seatCount}人战术桌盘`;
+      document.querySelector("#toggleRevealBtn").textContent = state.revealRoles ? "隐藏真实身份" : "显示真实身份";
+      document.querySelectorAll(".phase-chip").forEach((chip) => chip.classList.toggle("is-active", chip.dataset.phase === state.phase));
+    }
+
+    function renderAll() {
+      state.seatCount = normalizeSeatCount(state.seatCount);
+      state.phase = normalizePhase(state.phase);
+      state.players = normalizePlayers(state.players, state.seatCount);
+      state.roleConfig = normalizeRoleConfig(state.roleConfig, state.seatCount);
+      state.notes = normalizeNotes(state.notes);
+      state.votes = normalizeVotes(state.votes);
+      state.events = normalizeEvents(state.events);
+      renderLabels();
+      renderBoard();
+      renderQuickPanel();
+      renderQuickModal();
+      renderSetup();
+      renderVoteControls();
+      renderVoteOverview();
+      renderTimeline();
+      renderReview();
+      renderSavedGames();
+    }
+
+    function applyExampleGame() {
+      state = defaultState();
+      state.title = "12人机械狼示例局";
+      state.result = "狼人胜";
+      state.preset = "mechanical-psychic";
+      state.roleConfig = [
+        { faction: "wolf", role: "狼", count: 3 },
+        { faction: "wolf", role: "机械狼", count: 1 },
+        { faction: "god", role: "预言家", count: 1 },
+        { faction: "god", role: "女巫", count: 1 },
+        { faction: "god", role: "猎人", count: 1 },
+        { faction: "god", role: "守卫", count: 1 },
+        { faction: "god", role: "通灵师", count: 1 },
+        { faction: "civil", role: "民", count: 3 }
+      ];
+      state.ruleNotes = {
+        god: "示例：女巫、猎人、守卫、通灵师按线下约定执行。",
+        wolf: "示例：机械狼学习1号猎人；狼队可自爆拼刀。",
+        third: "本局无三方。"
+      };
+      state.players = createPlayers(12).map((player, index) => {
+        const data = examplePlayers[index];
+        return {
+          ...player,
+          name: data[0],
+          claimRole: data[1],
+          trueRole: data[2],
+          read: data[3]
+        };
+      });
+      state.players[4].sheriff = true;
+      state.players[1].status = "放逐";
+      state.players[0].status = "刀死";
+      state.players[6].status = "枪带";
+      state.players[3].status = "刀死";
+      state.players[4].status = "刀死";
+      state.players[1].phaseStatuses = { "第一天白天": "放逐" };
+      state.players[0].phaseStatuses = { "第一天白天": "刀死" };
+      state.players[6].phaseStatuses = { "第一天白天": "枪带" };
+      state.players[3].phaseStatuses = { "第二天白天": "刀死" };
+      state.players[4].phaseStatuses = { "第二天白天": "刀死" };
+      const seed = Date.now();
+      state.notes = [
+        noteSeed(seed + 1, 10, "警上", ["过麦"], "", "快速过麦到11号"),
+        noteSeed(seed + 2, 11, "警上", ["跳预", "发查杀", "炸身份"], 2, "简短发言，给2发杀"),
+        noteSeed(seed + 3, 1, "警上", ["站边"], 11, "情绪站11"),
+        noteSeed(seed + 4, 2, "警上", ["认民"], "", "警上认民"),
+        noteSeed(seed + 5, 5, "警上", ["跳预", "发金水"], 6, "给6金水"),
+        noteSeed(seed + 6, 8, "警上", ["站边"], 5, "点评后站5")
+      ];
+      state.events = [
+        ...state.notes.map((note) => ({ id: note.id + 100, ts: note.ts, phase: note.phase, type: "发言", actor: note.seat, target: note.target, text: note.summary })),
+        { id: seed + 20, ts: seed + 20, phase: "警上", type: "警长", actor: 5, target: "", text: "5号十叶9票当选警长，11号退水" },
+        { id: seed + 21, ts: seed + 21, phase: "第一天白天", type: "放逐", actor: 2, target: "", text: "5号外楼归票2号，2号出局" },
+        { id: seed + 22, ts: seed + 22, phase: "第一天白天", type: "刀死", actor: 1, target: 7, text: "狼人刀1号，1号猎人带走7号" },
+        { id: seed + 23, ts: seed + 23, phase: "第二天白天", type: "自爆", actor: 8, target: 4, text: "8号自爆刀4号" },
+        { id: seed + 24, ts: seed + 24, phase: "第二天白天", type: "自爆", actor: 9, target: 5, text: "9号自爆刀5号，狼人胜" }
+      ];
+      state.votes = [
+        { id: seed + 30, ts: seed + 30, phase: "警徽", round: "警徽票", target: 11, voters: [1, 4, 11] },
+        { id: seed + 31, ts: seed + 31, phase: "警徽", round: "警徽票", target: 5, voters: [2, 3, 5, 6, 7, 8, 9, 10, 12] }
+      ];
+      saveState();
+      renderAll();
+    }
+
+    function noteSeed(id, seat, phase, tags, target, text) {
+      return {
+        id,
+        ts: id,
+        phase,
+        seat,
+        target,
+        tags,
+        text,
+        summary: `${playerLabelFromExample(seat)}：${tags.join("、")}${target ? ` → ${playerLabelFromExample(target)}` : ""}${text ? `；${text}` : ""}`
+      };
+    }
+
+    function playerLabelFromExample(seat) {
+      const data = examplePlayers[seat - 1];
+      return `${seat}号 ${data ? data[0] : ""}`.trim();
+    }
+
+    function bindStaticEvents() {
+      document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => setView(tab.dataset.view)));
+      document.querySelectorAll(".phase-chip").forEach((chip) => chip.addEventListener("click", () => setPhase(chip.dataset.phase)));
+      document.querySelectorAll("[data-mobile-view]").forEach((button) => button.addEventListener("click", () => setView(button.dataset.mobileView)));
+      document.querySelector("#closeQuickModalBtn").addEventListener("click", () => closeQuickModal());
+      document.querySelector("#quickModal").addEventListener("click", (event) => {
+        if (event.target.id === "quickModal") closeQuickModal();
+      });
+
+      document.querySelector("#fillExampleBtn").addEventListener("click", applyExampleGame);
+      document.querySelector("#toggleRevealBtn").addEventListener("click", () => {
+        state.revealRoles = !state.revealRoles;
+        saveState();
+        renderAll();
+      });
+      document.querySelectorAll("[data-save-current]").forEach((button) => {
+        button.addEventListener("click", saveCurrentGameToHistory);
+      });
+      document.querySelector("#exportGameBtn").addEventListener("click", exportGame);
+      document.querySelector("#importGameBtn").addEventListener("click", () => document.querySelector("#importGameInput").click());
+      document.querySelector("#importGameInput").addEventListener("change", (event) => {
+        importGameFile(event.target.files?.[0]);
+        event.target.value = "";
+      });
+      document.querySelector("#resetBtn").addEventListener("click", () => {
+        if (!confirm("确定清空本局记录吗？")) return;
+        state = defaultState();
+        selectedVoters = new Set();
+        quickModalOpen = false;
+        saveState();
+        renderAll();
+        showToast("本局已清空");
+      });
+
+      document.querySelector("#seatCountInput").addEventListener("change", (event) => {
+        state.preset = "custom";
+        state.seatCount = normalizeSeatCount(event.target.value);
+        state.players = normalizePlayers(state.players, state.seatCount);
+        state.selectedSeat = Math.min(state.selectedSeat, state.seatCount);
+        state.roleConfig = defaultRoleConfig(state.seatCount);
+        saveState();
+        renderAll();
+      });
+      document.querySelectorAll("[data-add-faction]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const faction = button.dataset.addFaction;
+          state.preset = "custom";
+          state.roleConfig.push({ faction, role: factionRoles[faction][0], count: 1 });
+          saveState();
+          renderAll();
+        });
+      });
+      document.querySelector("#fillCivilianBtn").addEventListener("click", fillCivilianSlots);
+      document.querySelector("#godRuleInput").addEventListener("change", (event) => {
+        state.ruleNotes.god = event.target.value;
+        saveState();
+        renderAll();
+      });
+      document.querySelector("#wolfRuleInput").addEventListener("change", (event) => {
+        state.ruleNotes.wolf = event.target.value;
+        saveState();
+        renderAll();
+      });
+      document.querySelector("#thirdRuleInput").addEventListener("change", (event) => {
+        state.ruleNotes.third = event.target.value;
+        saveState();
+        renderAll();
+      });
+      document.querySelector("#gameTitleInput").addEventListener("change", (event) => {
+        state.title = event.target.value;
+        saveState();
+        renderAll();
+      });
+      document.querySelector("#resultInput").addEventListener("change", (event) => {
+        state.result = event.target.value;
+        saveState();
+        renderAll();
+      });
+      document.querySelector("#votePhaseInput").addEventListener("change", (event) => {
+        document.querySelector("#voteRoundInput").placeholder = voteRoundPlaceholder(event.target.value);
+      });
+      document.querySelector("#clearVotersBtn").addEventListener("click", () => {
+        selectedVoters = new Set();
+        renderVoteControls();
+        showToast("投票人已清空");
+      });
+      document.querySelector("#clearVotesBtn").addEventListener("click", clearVotes);
+      document.querySelector("#saveVoteBtn").addEventListener("click", saveVote);
+
+      document.querySelector("#refreshReviewBtn").addEventListener("click", renderReview);
+      document.querySelector("#copyReviewBtn").addEventListener("click", copyReviewText);
+      document.querySelector("#selectReviewBtn").addEventListener("click", () => {
+        const output = document.querySelector("#reviewOutput");
+        output.focus();
+        output.select();
+        showToast("复盘文本已选中");
+      });
+      document.querySelector("#copySavedGameBtn").addEventListener("click", copySavedGameText);
+      document.querySelector("#loadSavedGameBtn").addEventListener("click", loadSelectedSavedGame);
+      document.querySelector("#deleteSavedGameBtn").addEventListener("click", deleteSelectedSavedGame);
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && quickModalOpen) {
+          closeQuickModal();
+          return;
+        }
+        const tag = event.target.tagName.toLowerCase();
+        if (["input", "textarea", "select"].includes(tag)) return;
+        const map = { "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "0": 10, "-": 11, "=": 12 };
+        if (map[event.key] && map[event.key] <= state.seatCount) {
+          state.selectedSeat = map[event.key];
+          state.pendingTags = [];
+          saveState();
+          renderAll();
+        }
+      });
+    }
+
+    bindStaticEvents();
+    renderAll();
+  </script>
+</body>
+</html>
