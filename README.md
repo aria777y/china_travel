@@ -59,6 +59,7 @@ https://aria777y.github.io/china_travel/
 
 ```text
 https://aria777y.github.io/china_travel/werewolf/
+https://aria777y.github.io/china_travel/werewolf.html
 ```
 
 推送到 GitHub 后，在仓库页面打开：
