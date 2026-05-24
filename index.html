@@ -339,10 +339,190 @@
     }
 
     @media (max-width: 760px) {
-      .hero { min-height: 82vh; }
+      body {
+        overflow-x: hidden;
+        font-size: 15px;
+      }
+
+      .hero {
+        min-height: auto;
+        padding: 44px 16px 28px;
+        background:
+          linear-gradient(180deg, rgba(18, 24, 20, 0.88), rgba(18, 24, 20, 0.5) 62%, rgba(18, 24, 20, 0.22)),
+          url("https://commons.wikimedia.org/wiki/Special:FilePath/Tibetan%20prayer%20flags%20over%20road%20-%20JRN2661.jpg?width=1400") center / cover;
+      }
+
+      h1 { font-size: 38px; }
+      h2 { font-size: 30px; }
+
+      .hero p {
+        margin-top: 16px;
+        font-size: 16px;
+      }
+
+      .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 22px;
+      }
+
+      .hero-stat {
+        min-width: 0;
+        padding: 10px;
+      }
+
+      .hero-stat strong { font-size: 16px; }
+      .hero-stat span { font-size: 12px; }
+
+      nav {
+        position: sticky;
+        max-width: 100vw;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        align-items: center;
+        padding: 8px 12px;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      nav a,
+      .print-btn {
+        flex: 0 0 auto;
+        padding: 8px 10px;
+      }
+
+      .print-btn { display: none; }
+
+      main { overflow: visible; }
+      section { padding: 36px 16px; }
+      .grid { grid-template-columns: 1fr; }
       .table-tools { grid-template-columns: 1fr; }
       .phase-row { grid-template-columns: 1fr; }
-      nav { position: static; }
+      .route-visual {
+        margin-right: -16px;
+        border-right: 0;
+        border-radius: 8px 0 0 8px;
+      }
+
+      .table-wrap {
+        overflow: visible;
+        max-height: none;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      table {
+        min-width: 0;
+        font-size: 14px;
+      }
+
+      #daily table,
+      #daily thead,
+      #daily tbody,
+      #daily tr,
+      #daily td {
+        display: block;
+        width: 100%;
+      }
+
+      #daily thead { display: none; }
+
+      #daily tbody {
+        display: grid;
+        gap: 12px;
+      }
+
+      #daily tr {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 12px;
+        background: #fff;
+        box-shadow: 0 8px 22px rgba(34, 33, 29, 0.07);
+      }
+
+      #daily tr:hover td { background: transparent; }
+
+      #daily td {
+        display: grid;
+        grid-template-columns: 82px minmax(0, 1fr);
+        gap: 8px;
+        border-bottom: 0;
+        padding: 7px 0;
+        white-space: normal;
+      }
+
+      #daily td::before {
+        content: attr(data-label);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      #daily td[data-label="路线/安排"],
+      #daily td[data-label="备注/评论"] {
+        grid-template-columns: 1fr;
+      }
+
+      #daily td[data-label="路线/安排"]::before,
+      #daily td[data-label="备注/评论"]::before {
+        margin-bottom: -2px;
+      }
+
+      #daily .row-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .mini-action {
+        min-height: 40px;
+        width: 100%;
+        padding: 9px 10px;
+      }
+
+      .budget-table,
+      .budget-table thead,
+      .budget-table tbody,
+      .budget-table tr,
+      .budget-table td {
+        display: block;
+        width: 100%;
+        min-width: 0;
+      }
+
+      .budget-table thead { display: none; }
+
+      .budget-table tbody {
+        display: grid;
+        gap: 10px;
+      }
+
+      .budget-table tr {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 12px;
+        background: #fff;
+      }
+
+      .budget-table td {
+        display: grid;
+        grid-template-columns: 86px minmax(0, 1fr);
+        gap: 8px;
+        border-bottom: 0;
+        padding: 7px 0;
+      }
+
+      .budget-table td:nth-child(1)::before { content: "项目"; }
+      .budget-table td:nth-child(2)::before { content: "省钱档"; }
+      .budget-table td:nth-child(3)::before { content: "舒适档"; }
+      .budget-table td:nth-child(4)::before { content: "说明"; }
+
+      .budget-table td::before {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 900;
+      }
     }
 
     @media print {
@@ -877,15 +1057,15 @@
 
       dailyRows.innerHTML = filtered.map(day => `
         <tr>
-          <td><span class="tag">D${day.day}</span></td>
-          <td>${day.dateText}</td>
-          <td><strong>${day.route}</strong><br><span class="muted">${day.phase} · ${day.overnight}</span></td>
-          <td>${day.km} km</td>
-          <td>${day.stay}</td>
-          <td>${day.food}</td>
-          <td>${day.sights}</td>
-          <td>${day.charge}</td>
-          <td>
+          <td data-label="Day"><span class="tag">D${day.day}</span></td>
+          <td data-label="日期">${day.dateText}</td>
+          <td data-label="路线/安排"><strong>${day.route}</strong><br><span class="muted">${day.phase} · ${day.overnight}</span></td>
+          <td data-label="公里">${day.km} km</td>
+          <td data-label="住宿建议">${day.stay}</td>
+          <td data-label="吃饭推荐">${day.food}</td>
+          <td data-label="景点与票价">${day.sights}</td>
+          <td data-label="补能与注意">${day.charge}</td>
+          <td data-label="备注/评论">
             <div class="row-actions">
               <button class="mini-action" type="button" data-collab-kind="notes" data-day="${day.day}">备注 ${collabCount("notes", day.day)}</button>
               <button class="mini-action" type="button" data-collab-kind="comments" data-day="${day.day}">评论 ${collabCount("comments", day.day)}</button>

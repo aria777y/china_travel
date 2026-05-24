@@ -38,6 +38,8 @@ const htmlNeedles = [
   'id="collabDrawer"',
   'id="profileModal"',
   "window.ROADTRIP_DAYS = days",
+  'data-label="路线/安排"',
+  'data-label="备注/评论"',
   'data-collab-kind="notes"',
   'data-collab-kind="comments"',
   "roadtrip-api.js",
