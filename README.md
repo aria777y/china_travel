@@ -20,6 +20,7 @@ python3 -m http.server 8765
 6. 在 URL Configuration 中加入本地地址和正式公网地址：
    - `http://localhost:8765`
    - `https://aria777y.github.io/china_travel/`
+   - `https://china-travel-roadtrip.pages.dev/`
 7. 把 Supabase Project URL 和 anon public key 写入 `assets/roadtrip-config.js`：
 
 ```js
@@ -28,7 +29,7 @@ window.ROADTRIP_SUPABASE_CONFIG = {
   url: "https://你的项目.supabase.co",
   anonKey: "你的 anon public key",
   oauthProvider: "github",
-  redirectPath: "/china_travel/"
+  redirectPath: "auto"
 };
 ```
 
@@ -53,6 +54,7 @@ where display_name = '你的公开显示姓名';
 
 ```text
 https://aria777y.github.io/china_travel/
+https://china-travel-roadtrip.pages.dev/
 ```
 
 同一 GitHub Pages 站点也托管狼人杀实战记录工具：
@@ -76,6 +78,20 @@ Folder: / (root)
 ```
 
 保存后等待 GitHub Pages 构建完成。发布后，将 GitHub Pages 域名加入 Supabase Auth redirect URLs。
+
+## Cloudflare Pages 发布
+
+独立短链接：
+
+```text
+https://china-travel-roadtrip.pages.dev/
+```
+
+本项目是纯静态页面，可直接部署仓库根目录：
+
+```bash
+wrangler pages deploy . --project-name china-travel-roadtrip
+```
 
 ## 验证
 

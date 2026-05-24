@@ -24,6 +24,19 @@
     return "操作失败，请稍后重试";
   }
 
+  function defaultRedirectPath() {
+    const firstPathSegment = window.location.pathname.split("/").filter(Boolean)[0];
+    if (firstPathSegment === "china_travel") return "/china_travel/";
+    return "/";
+  }
+
+  function authRedirectUrl() {
+    const path = config.redirectPath && config.redirectPath !== "auto"
+      ? config.redirectPath
+      : defaultRedirectPath();
+    return new URL(path, window.location.origin).toString();
+  }
+
   async function getSession() {
     if (!client) return { session: null, user: null };
     const { data, error } = await client.auth.getSession();
@@ -41,7 +54,7 @@
 
   async function signInWithOAuth() {
     if (!client) throw new Error("请先配置 Supabase URL 和 anon key");
-    const redirectTo = new URL(config.redirectPath || "/", window.location.origin).toString();
+    const redirectTo = authRedirectUrl();
     const { error } = await client.auth.signInWithOAuth({
       provider: config.oauthProvider || "github",
       options: { redirectTo }
@@ -51,7 +64,7 @@
 
   async function signInWithEmail(email) {
     if (!client) throw new Error("请先配置 Supabase URL 和 anon key");
-    const redirectTo = new URL(config.redirectPath || "/", window.location.origin).toString();
+    const redirectTo = authRedirectUrl();
     const { error } = await client.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: redirectTo }
